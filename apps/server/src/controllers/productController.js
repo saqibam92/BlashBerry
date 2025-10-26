@@ -3,6 +3,7 @@
 const Category = require("../models/Category");
 const Product = require("../models/Product");
 const { validationResult } = require("express-validator");
+const mongoose = require("mongoose");
 
 // Get all products with filtering and pagination
 const getProducts = async (req, res) => {
@@ -318,6 +319,75 @@ const createProductReview = async (req, res) => {
 //   }
 // };
 
+// Get products for a specific category
+const getCategoryProducts = async (req, res) => {
+  try {
+    const { page = 1, limit = 12, sort = "createdAt", search } = req.query;
+    const { categoryId } = req.params;
+
+    // Validate categoryId
+    if (!mongoose.Types.ObjectId.isValid(categoryId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid category ID",
+      });
+    }
+
+    // Build query object
+    let query = { isActive: true, category: categoryId };
+
+    if (search) {
+      query.name = { $regex: search, $options: "i" };
+    }
+
+    // Build sort object
+    let sortObj = {};
+    switch (sort) {
+      case "price_asc":
+        sortObj.price = 1;
+        break;
+      case "price_desc":
+        sortObj.price = -1;
+        break;
+      case "rating":
+        sortObj.rating = -1;
+        break;
+      case "newest":
+        sortObj.createdAt = -1;
+        break;
+      default:
+        sortObj.createdAt = -1;
+    }
+
+    // Execute query with pagination
+    const skip = (page - 1) * limit;
+    const products = await Product.find(query)
+      .populate("category", "name")
+      .sort(sortObj)
+      .skip(skip)
+      .limit(Number(limit));
+
+    const total = await Product.countDocuments(query);
+
+    res.json({
+      success: true,
+      data: products,
+      pagination: {
+        current: Number(page),
+        pages: Math.ceil(total / limit),
+        total,
+        hasNext: page * limit < total,
+        hasPrev: page > 1,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 // --- Get all unique categories from products ---
 const getCategories = async (req, res) => {
   try {
@@ -340,4 +410,5 @@ module.exports = {
   deleteProduct,
   createProductReview,
   getCategories,
+  getCategoryProducts,
 };

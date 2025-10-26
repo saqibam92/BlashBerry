@@ -1,4 +1,4 @@
-// File: apps/client/src/contexts/AuthContexts.js
+// File: apps/client/src/contexts/AuthContext.js
 "use client";
 import { createContext, useContext, useReducer, useEffect } from "react";
 import api from "@/lib/api";
@@ -95,21 +95,28 @@ export const AuthProvider = ({ children }) => {
   };
 
   const register = async (name, email, password) => {
-    // This is a placeholder for your registration logic
-    // You would typically post to a register endpoint, log the user in,
-    // and then merge the cart.
-    console.log("Register function not fully implemented.", {
-      name,
-      email,
-      password,
-    });
-    // Example:
-    // const res = await api.post('/api/auth/register', { name, email, password });
-    // Cookies.set("token", res.data.token);
-    // if (cartContext && cartContext.mergeLocalCart) {
-    //   await cartContext.mergeLocalCart();
-    // }
-    // dispatch({ type: "AUTH_SUCCESS", payload: { user: res.data.user } });
+    dispatch({ type: "LOGIN_START" });
+    try {
+      const res = await api.post("/api/auth/register", {
+        name,
+        email,
+        password,
+      });
+      Cookies.set("token", res.data.token, { expires: 7, secure: true });
+
+      // Merge cart after registration
+      if (cartContext && cartContext.mergeLocalCart) {
+        await cartContext.mergeLocalCart();
+      }
+
+      dispatch({ type: "AUTH_SUCCESS", payload: { user: res.data.user } });
+
+      return { success: true };
+    } catch (err) {
+      const message = err.response?.data?.message || "Registration failed";
+      dispatch({ type: "AUTH_ERROR", payload: message });
+      return { success: false, error: message };
+    }
   };
 
   const logout = () => {

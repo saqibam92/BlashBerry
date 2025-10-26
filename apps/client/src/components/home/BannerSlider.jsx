@@ -42,13 +42,13 @@ export default function BannerSlider({ banners }) {
         textShadow: "2px 2px 8px rgba(0,0,0,0.7)",
       }}
     >
-      <Typography
+      {/* <Typography
         variant="h2"
         component="h1"
         sx={{ fontWeight: "bold", textAlign: "center", p: 2 }}
       >
         {currentBanner.title}
-      </Typography>
+      </Typography> */}
     </Box>
   );
 

@@ -9,10 +9,9 @@ import api from "./api";
 export const getFeaturedProducts = async () => {
   try {
     const response = await api.get("/api/products/featured");
-    return response.data.data; // The API returns data nested under a 'data' key
+    return response.data.data;
   } catch (error) {
     console.error("Failed to fetch featured products:", error);
-    // In a real app, you might want to throw the error or return a default value
     return [];
   }
 };
@@ -29,15 +28,16 @@ export const getFeaturedProducts = async () => {
  * @param {number} params.page - Page number for pagination.
  * @param {number} params.limit - Number of items per page.
  * @param {string} params.search - Search term.
+ * @param {string} params.color - Filter by color.
  * @returns {Promise<object>} A promise that resolves to the API response object.
  */
 export const getAllProducts = async (params = {}) => {
   try {
     const response = await api.get("/api/products", { params });
-    return response.data; // Returns the full response with data and pagination
+    return response.data;
   } catch (error) {
     console.error("Failed to fetch products:", error);
-    return { data: [], pagination: {} }; // Return a default structure on error
+    return { data: [], pagination: {} };
   }
 };
 
@@ -95,13 +95,62 @@ export const searchProducts = async (term) => {
  */
 export const getCategories = async () => {
   try {
-    // --- FIX: Point to the new, correct public endpoint ---
     const response = await api.get("/api/category/categories");
-    return response.data; // The API returns { success: true, data: [...] }
+    return response.data;
   } catch (error) {
     console.error("Failed to fetch categories:", error);
     return { success: false, data: [] };
   }
 };
 
+/**
+ * Fetches details of a specific category by slug.
+ * @param {string} slug - The slug of the category to fetch.
+ * @returns {Promise<object|null>} A promise that resolves to the category object or null if not found.
+ */
+export const getCategoryData = async (slug) => {
+  try {
+    const response = await api.get(`/api/category/${slug}`);
+    return response.data.data.category;
+  } catch (error) {
+    console.error(`Failed to fetch category ${slug}:`, error);
+    return null;
+  }
+};
+
+/**
+ * Fetches products for a specific category by its ID.
+ * @param {string} categoryId - The ID of the category.
+ * @param {object} params - Additional query parameters (e.g., page, limit, sort).
+ * @returns {Promise<object>} A promise that resolves to the API response object.
+ */
+export const getCategoryProducts = async (categoryId, params = {}) => {
+  try {
+    const response = await api.get(`/api/products/category/${categoryId}`, {
+      params,
+    });
+    return response.data;
+  } catch (error) {
+    console.error(
+      `Failed to fetch products for category ${categoryId}:`,
+      error
+    );
+    return { data: [], pagination: {} };
+  }
+};
+
 export const getActiveBanners = () => api.get("/api/products/banners/active");
+
+/**
+ * Fetches the selected video for the homepage.
+ * @returns {Promise<object>} A promise that resolves to the API response object.
+ */
+export const getSelectedVideo = async () => {
+  try {
+    const response = await api.get("/api/video");
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch selected video:", error);
+    return { success: false, data: null };
+  }
+};

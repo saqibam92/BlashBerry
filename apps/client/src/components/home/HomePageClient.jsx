@@ -4,9 +4,7 @@
 import ProductCard from "@/components/product/ProductCard";
 import { useQuickView } from "@/hooks/useQuickView";
 
-// This component receives the product data as props from its parent (the Server Component).
 export default function HomePageClient({ products }) {
-  // We can safely call the client-side hook here because of the "use client" directive.
   const { handleOpenQuickView, QuickViewComponent } = useQuickView();
 
   return (
@@ -16,12 +14,11 @@ export default function HomePageClient({ products }) {
       </h2>
 
       {products.length > 0 ? (
-        <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8">
+        <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-5 xl:gap-x-8">
           {products.map((product) => (
             <ProductCard
               key={product._id}
               product={product}
-              // The handler from the hook is passed down to each card.
               onQuickViewOpen={handleOpenQuickView}
             />
           ))}
@@ -33,7 +30,6 @@ export default function HomePageClient({ products }) {
         </p>
       )}
 
-      {/* The QuickView modal is rendered here. */}
       <QuickViewComponent />
     </>
   );

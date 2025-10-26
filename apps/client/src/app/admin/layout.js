@@ -35,6 +35,7 @@ const navItems = [
   { text: "Orders", icon: <ShoppingCart />, href: "/admin/orders" },
   { text: "Users", icon: <Group />, href: "/admin/users" },
   { text: "Banners", icon: <Group />, href: "/admin/banners" },
+  { text: "Videos", icon: <Settings />, href: "/admin/videos" },
   { text: "Settings", icon: <Settings />, href: "/admin/settings" },
 ];
 

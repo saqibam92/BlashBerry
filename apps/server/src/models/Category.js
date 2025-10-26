@@ -1,3 +1,5 @@
+// File: apps/server/src/models/Category.js
+
 const mongoose = require("mongoose");
 const slugify = require("slugify");
 

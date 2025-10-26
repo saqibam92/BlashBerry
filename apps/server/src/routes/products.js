@@ -13,6 +13,7 @@ const {
   deleteProduct,
   createProductReview,
   getCategories,
+  getCategoryProducts,
 } = require("../controllers/productController");
 const { protect, admin } = require("../middleware/auth");
 const Banner = require("../models/Banner");
@@ -53,6 +54,7 @@ router.get("/search", searchProducts);
 router.get("/featured", getFeaturedProducts);
 router.get("/:slug", getProduct);
 router.get("/:slug/similar", getSimilarProducts);
+router.get("/category/:categoryId", getCategoryProducts);
 router.post("/:slug/reviews", protect, createProductReview);
 // router.get("/categories", getCategories);
 
