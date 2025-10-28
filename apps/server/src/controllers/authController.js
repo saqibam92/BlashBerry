@@ -1,5 +1,4 @@
 // File: apps/server/src/controllers/authController.js
-
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 const { validationResult } = require("express-validator");
@@ -7,41 +6,27 @@ const { validationResult } = require("express-validator");
 // Generate JWT Token
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRE,
+    expiresIn: process.env.JWT_EXPIRE || "7d",
   });
 };
 
 // Register user
-const register = async (req, res) => {
+exports.register = async (req, res) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        message: "Validation failed",
-        errors: errors.array(),
-      });
+      return res.status(400).json({ success: false, errors: errors.array() });
     }
 
     const { name, email, password } = req.body;
-
-    // Check if user exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({
-        success: false,
-        message: "User already exists",
-      });
+      return res
+        .status(400)
+        .json({ success: false, message: "User already exists" });
     }
 
-    // Create user
-    const user = await User.create({
-      name,
-      email,
-      password,
-      provider: "local",
-    });
-
+    const user = await User.create({ name, email, password });
     const token = generateToken(user._id);
 
     res.status(201).json({
@@ -55,71 +40,12 @@ const register = async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
 // Login user
-const login = async (req, res) => {
-  try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        message: "Validation failed",
-        errors: errors.array(),
-      });
-    }
-
-    const { email, password } = req.body;
-
-    // Check for user
-    const user = await User.findOne({ email }).select("+password");
-    if (!user || !(await user.comparePassword(password))) {
-      return res.status(401).json({
-        success: false,
-        message: "Invalid credentials",
-      });
-    }
-
-    const token = generateToken(user._id);
-
-    res.json({
-      success: true,
-      token,
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-      },
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
-  }
-};
-
-// Get current user
-const getMe = async (req, res) => {
-  res.json({
-    success: true,
-    user: {
-      id: req.user._id,
-      name: req.user.name,
-      email: req.user.email,
-      role: req.user.role,
-    },
-  });
-};
-
-// ---Admin Login ---
-const adminLogin = async (req, res) => {
+exports.login = async (req, res) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -127,21 +53,15 @@ const adminLogin = async (req, res) => {
     }
 
     const { email, password } = req.body;
-
-    // Find user and explicitly check for 'admin' role
-    const user = await User.findOne({ email, role: "admin" }).select(
-      "+password"
-    );
+    const user = await User.findOne({ email }).select("+password");
 
     if (!user || !(await user.comparePassword(password))) {
-      return res.status(401).json({
-        success: false,
-        message: "Invalid credentials or not an admin",
-      });
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid credentials" });
     }
 
     const token = generateToken(user._id);
-
     res.json({
       success: true,
       token,
@@ -157,9 +77,82 @@ const adminLogin = async (req, res) => {
   }
 };
 
-module.exports = {
-  register,
-  login,
-  getMe,
-  adminLogin,
+// Admin login
+exports.adminLogin = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const admin = await User.findOne({ email }).select("+password");
+
+    if (!admin || !(await admin.comparePassword(password))) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid credentials" });
+    }
+
+    if (!["admin", "masterAdmin", "moderator"].includes(admin.role)) {
+      return res.status(403).json({ success: false, message: "Unauthorized" });
+    }
+
+    const token = generateToken(admin._id);
+    res.json({
+      success: true,
+      token,
+      user: {
+        id: admin._id,
+        name: admin.name,
+        email: admin.email,
+        role: admin.role,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// Get current user
+exports.getMe = async (req, res) => {
+  try {
+    res.json({
+      success: true,
+      user: {
+        id: req.user._id,
+        name: req.user.name,
+        email: req.user.email,
+        role: req.user.role,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// Update user profile
+exports.updateUser = async (req, res) => {
+  try {
+    const { name, password } = req.body;
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+
+    if (name) user.name = name;
+    if (password) user.password = password;
+
+    await user.save();
+
+    res.json({
+      success: true,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
 };

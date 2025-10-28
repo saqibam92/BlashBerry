@@ -7,19 +7,12 @@ const orderSchema = new mongoose.Schema(
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: false, // Allow guest checkout using phone number
+      required: false, // Allow guest checkout using mobile number
     },
-    phone: {
+    email: {
       type: String,
       required: function () {
         return !this.user;
-      },
-      validate: {
-        validator: function (v) {
-          // Validate Bangladeshi phone number: +88 followed by 11 digits
-          return /^(\+8801\d{9}|01\d{9})$/.test(v);
-        },
-        message: (props) => `${props.value} is not a valid mobile number!`,
       },
     },
     products: [
