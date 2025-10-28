@@ -194,6 +194,24 @@ export default function AdminProductsPage() {
                 <TableCell>{product.category?.name}</TableCell>
                 <TableCell>{formatPrice(product.price)}</TableCell>
                 <TableCell>
+                  <Box sx={{ display: "flex", alignItems: "center" }}>
+                    <Avatar
+                      src={product.images[0]}
+                      alt={product.name}
+                      variant="rounded"
+                      sx={{ mr: 2 }}
+                    />
+                    <div>
+                      <div>{product.name}</div>
+                      {product.details?.model && (
+                        <Typography variant="caption" color="text.secondary">
+                          Model: {product.details.model}
+                        </Typography>
+                      )}
+                    </div>
+                  </Box>
+                </TableCell>
+                <TableCell>
                   <Switch
                     checked={product.isFeatured}
                     onChange={() =>

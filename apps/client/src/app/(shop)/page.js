@@ -28,7 +28,7 @@ async function getHomePageData() {
     return { banners, products, categories, video };
   } catch (error) {
     console.error("Failed to fetch homepage data:", error.message);
-    return { banners: [], products: [], categories: [], video: [] };
+    return { banners: [], products: [], categories: [], videos: [] };
   }
 }
 

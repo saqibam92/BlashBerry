@@ -48,7 +48,7 @@ export const uploadBannerImage = (formData) =>
 
 export const getAdminVideos = async () => {
   try {
-    const response = await api.get("/api/videos/admin");
+    const response = await api.get("/api/video/admin");
     return response.data;
   } catch (error) {
     console.error("Failed to fetch videos:", error);

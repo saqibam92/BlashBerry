@@ -15,12 +15,13 @@ import {
   ListItem,
   ListItemText,
   Divider,
-  Button,
+  // Button,
   ListItemIcon,
 } from "@mui/material";
 import { CheckCircle, ShoppingBag } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
 import Image from "next/image";
+import Button from "@/components/ui/Button";
 
 export default function OrderConfirmationPage() {
   const [order, setOrder] = useState(null);
@@ -29,6 +30,17 @@ export default function OrderConfirmationPage() {
   const params = useParams();
   const router = useRouter();
   const { orderId } = params;
+
+  // const displayImage =
+  //   order.products.map((product) => product.images?.find((img) => {
+  //     if (!img) return false;
+  //     if (typeof img === "string") return img.length > 0;
+  //     if (typeof img === "object" && typeof img.url === "string")
+  //       return img.url.length > 0;
+  //     return false;
+  //   })?.url ||
+  //   product.images?.[0] ||
+  //   "https://placehold.co/400x400/f8fafc/64748b?text=No+Image")
 
   useEffect(() => {
     if (!orderId) {
@@ -124,7 +136,10 @@ export default function OrderConfirmationPage() {
                 <ListItem key={product._id + size} divider>
                   <ListItemIcon>
                     <Image
-                      src={product.images[0] || "https://placehold.co/100x100"}
+                      src={
+                        product.images[0] ||
+                        "https://placehold.co/400x400/f8fafc/64748b?text=No+Image"
+                      }
                       alt={product.name}
                       width={64}
                       height={64}
@@ -173,10 +188,11 @@ export default function OrderConfirmationPage() {
 
         <Box sx={{ textAlign: "center", mt: 5 }}>
           <Button
+            size="lg"
+            className="bg-pink-500/50"
             variant="contained"
-            startIcon={<ShoppingBag />}
+            starticon={<ShoppingBag />}
             onClick={() => router.push("/products")}
-            size="large"
           >
             Continue Shopping
           </Button>

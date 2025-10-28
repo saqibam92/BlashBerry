@@ -1,17 +1,18 @@
 //  apps/slient/src/context/CartContext.js
+// File: apps/client/src/contexts/CartContext.js
 "use client";
 import { createContext, useContext, useReducer, useEffect } from "react";
 import toast from "react-hot-toast";
+import api from "@/lib/api"; // axios instance
+import Cookies from "js-cookie";
 
 const CartContext = createContext();
 
 const cartReducer = (state, action) => {
   switch (action.type) {
-    // This new action handles setting the cart and indicating that loading is complete.
     case "LOAD_CART":
       return { ...state, items: action.payload, loading: false };
 
-    // All other actions now just modify the items array.
     case "ADD_TO_CART": {
       const { product, quantity, size } = action.payload;
       const existingItem = state.items.find(
@@ -29,6 +30,7 @@ const cartReducer = (state, action) => {
       }
       return { ...state, items: [...state.items, { product, quantity, size }] };
     }
+
     case "UPDATE_QUANTITY":
       return {
         ...state,
@@ -39,6 +41,7 @@ const cartReducer = (state, action) => {
             : item
         ),
       };
+
     case "REMOVE_FROM_CART":
       return {
         ...state,
@@ -50,46 +53,43 @@ const cartReducer = (state, action) => {
             )
         ),
       };
+
     case "CLEAR_CART":
       return { ...state, items: [] };
+
     default:
       return state;
   }
 };
 
 export const CartProvider = ({ children }) => {
-  // The initial state now includes a `loading` flag, set to true.
   const [state, dispatch] = useReducer(cartReducer, {
     items: [],
     loading: true,
   });
 
-  // This effect runs ONLY ONCE on the client to load the cart.
+  // Load cart from localStorage once on mount
   useEffect(() => {
     try {
       const savedCart = localStorage.getItem("cart");
-      // If a cart exists in storage, load it. Otherwise, load an empty array.
-      if (savedCart) {
-        dispatch({ type: "LOAD_CART", payload: JSON.parse(savedCart) });
-      } else {
-        // We are no longer loading, even if the cart was empty.
-        dispatch({ type: "LOAD_CART", payload: [] });
-      }
+      dispatch({
+        type: "LOAD_CART",
+        payload: savedCart ? JSON.parse(savedCart) : [],
+      });
     } catch (error) {
-      console.error("Failed to load cart from localStorage.", error);
-      // If parsing fails, default to an empty cart and stop loading.
+      console.error("Failed to load cart from localStorage:", error);
       dispatch({ type: "LOAD_CART", payload: [] });
     }
   }, []);
 
-  // This separate effect syncs the cart to localStorage whenever items change.
-  // It will NOT run on the initial render or while loading is true.
+  // Sync cart with localStorage whenever items change
   useEffect(() => {
     if (!state.loading) {
       localStorage.setItem("cart", JSON.stringify(state.items));
     }
   }, [state.items, state.loading]);
 
+  // 🧠 Add to Cart
   const addToCart = (product, quantity = 1, size) => {
     if (!size) {
       toast.error("Please select a size first.");
@@ -117,6 +117,7 @@ export const CartProvider = ({ children }) => {
 
   const clearCart = () => {
     dispatch({ type: "CLEAR_CART" });
+    localStorage.removeItem("cart");
   };
 
   const getCartItemCount = () =>
@@ -128,16 +129,60 @@ export const CartProvider = ({ children }) => {
       0
     );
 
+  // ✅ mergeLocalCart: Sync guest cart → user cart after login/signup
+  const mergeLocalCart = async () => {
+    try {
+      const token = Cookies.get("token");
+      if (!token) return;
+
+      const localCart = JSON.parse(localStorage.getItem("cart") || "[]");
+      if (localCart.length === 0) return;
+
+      const payload = localCart.map((item) => ({
+        productId: item.product._id,
+        quantity: item.quantity,
+        size: item.size,
+      }));
+
+      const res = await api.post(
+        "/api/cart/merge",
+        { items: payload },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      // Replace local cart with merged result from backend
+      const mergedItems = res.data.data || [];
+      dispatch({ type: "LOAD_CART", payload: mergedItems });
+      localStorage.setItem("cart", JSON.stringify(mergedItems));
+
+      toast.success("Your cart has been synced successfully!");
+    } catch (error) {
+      console.error("Cart merge failed:", error);
+      toast.error("Failed to sync your cart.");
+    }
+  };
+
+  // ✅ clearCartForLogout: Reset cart locally on logout
+  const clearCartForLogout = () => {
+    dispatch({ type: "CLEAR_CART" });
+    localStorage.removeItem("cart");
+    toast.success("Cart cleared.");
+  };
+
   return (
     <CartContext.Provider
       value={{
-        ...state, // This now includes `items` AND `loading`
+        ...state,
         addToCart,
         updateQuantity,
         removeFromCart,
         clearCart,
         getCartItemCount,
         getCartTotal,
+        mergeLocalCart,
+        clearCartForLogout,
       }}
     >
       {children}

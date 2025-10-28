@@ -8,8 +8,12 @@ import {
   ListItemText,
   Divider,
   Box,
+  ListItemAvatar,
+  ListItemIcon,
 } from "@mui/material";
 import { formatPrice } from "@/lib/utils";
+import Image from "next/image";
+import Link from "next/link";
 
 const OrderSummary = ({ items, total }) => {
   return (
@@ -23,6 +27,9 @@ const OrderSummary = ({ items, total }) => {
             key={`${item.product._id}-${item.size}`}
             sx={{ py: 1, px: 0 }}
           >
+            <ListItemAvatar>
+              <Image src={item.product.images[0]} width={50} height={50} />
+            </ListItemAvatar>
             <ListItemText
               primary={item.product.name}
               secondary={`Size: ${item.size} x ${item.quantity}`}

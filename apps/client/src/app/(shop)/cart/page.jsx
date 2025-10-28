@@ -4,7 +4,7 @@ import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   Box,
-  Button,
+  // Button,
   Typography,
   Paper,
   Grid,
@@ -18,6 +18,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { formatPrice } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import Button from "@/components/ui/Button";
 
 export default function CartPage() {
   const {
@@ -27,7 +28,7 @@ export default function CartPage() {
     getCartTotal,
     getCartItemCount,
   } = useCart();
-  const { isAuthenticated } = useAuth();
+  // const { isAuthenticated } = useAuth();
   const router = useRouter();
 
   const handleCheckout = () => {
@@ -40,9 +41,15 @@ export default function CartPage() {
         <Typography variant="h4" gutterBottom>
           Your Cart is Empty
         </Typography>
-        <Button component={Link} href="/products" variant="contained">
-          Continue Shopping
-        </Button>
+        <Link href="/products">
+          <Button
+            variant="default"
+            size="lg"
+            className="bg-pink-500/90 hover:bg-pink-600 text-white"
+          >
+            Continue Shopping
+          </Button>
+        </Link>
       </Container>
     );
   }
@@ -60,15 +67,20 @@ export default function CartPage() {
               sx={{ display: "flex", alignItems: "center", mb: 2, p: 2 }}
               elevation={2}
             >
-              <Image
-                src={item.product.images[0]}
-                alt={item.product.name}
-                width={100}
-                height={100}
-                style={{ objectFit: "cover", borderRadius: "8px" }}
-              />
+              <Link href={`/products/${item.product.slug}`}>
+                <Image
+                  src={item.product.images[0]}
+                  alt={item.product.name}
+                  width={100}
+                  height={100}
+                  style={{ objectFit: "cover", borderRadius: "8px" }}
+                />
+              </Link>
               <Box sx={{ flexGrow: 1, ml: 2 }}>
-                <Typography variant="h6">{item.product.name}</Typography>
+                <Link href={`/products/${item.product.slug}`}>
+                  <Typography variant="h6">{item.product.name}</Typography>
+                </Link>
+
                 <Typography color="text.secondary">
                   Size: {item.size}
                 </Typography>
@@ -124,14 +136,16 @@ export default function CartPage() {
                 {formatPrice(getCartTotal())}
               </Typography>
             </Box>
+
             <Button
               onClick={handleCheckout}
-              variant="contained"
-              fullWidth
-              size="large"
-              sx={{ mt: 2 }}
+              variant="outline"
+              // fullWidth
+              size="lg"
+              className="w-full mt-2 bg-pink-500/90 hover:bg-pink-600 text-white"
             >
-              {isAuthenticated ? "Proceed to Checkout" : "Login to Checkout"}
+              {/* {isAuthenticated ? "Proceed to Checkout" : "Login to Checkout"} */}
+              Checkout
             </Button>
           </Paper>
         </Grid>

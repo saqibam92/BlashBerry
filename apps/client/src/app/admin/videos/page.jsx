@@ -24,7 +24,7 @@ import {
   Select,
   MenuItem,
 } from "@mui/material";
-import { Edit, Delete } from "@mui/icons-material";
+import { Edit, Delete, Add } from "@mui/icons-material";
 import {
   getAdminVideos,
   deleteAdminVideo,

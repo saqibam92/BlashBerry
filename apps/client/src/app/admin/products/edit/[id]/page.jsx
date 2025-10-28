@@ -2,7 +2,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-import ProductForm from "../../ProductForm";
+import ProductForm from "../../../../../components/admin/ProductForm";
 import { Box, Typography, CircularProgress } from "@mui/material";
 import { getAdminProductById } from "@/lib/adminApi";
 

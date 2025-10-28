@@ -65,7 +65,9 @@ export default function AdminOrdersPage() {
             {orders.map((order) => (
               <TableRow key={order._id}>
                 <TableCell>...{order.orderNumber.slice(-12)}</TableCell>
-                <TableCell>{order.user?.name || "Guest"}</TableCell>
+                <TableCell>
+                  {order.user?.name || order.shippingAddress?.fullName}
+                </TableCell>
                 <TableCell>{formatDate(order.createdAt)}</TableCell>
                 <TableCell>{formatPrice(order.totalAmount)}</TableCell>
                 <TableCell>

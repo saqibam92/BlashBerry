@@ -150,7 +150,8 @@ export default function Footer() {
             alt="PayPal"
             width={40}
             height={25}
-            style={{ objectFit: "contain" }}
+            // style={{ objectFit: "contain" }}
+            style={{ width: "auto", height: "auto" }}
           />
           <Image src="/payments/visa.png" alt="Visa" width={40} height={25} />
           <Image
@@ -158,14 +159,16 @@ export default function Footer() {
             alt="Mastercard"
             width={40}
             height={25}
-            style={{ objectFit: "contain" }}
+            // style={{ objectFit: "contain" }}
+            style={{ width: "auto", height: "auto" }}
           />
           <Image
             src="/payments/cod.png"
             alt="Cash On Delivery"
             width={40}
             height={25}
-            style={{ objectFit: "contain" }}
+            // style={{ objectFit: "contain" }}
+            style={{ width: "auto", height: "auto" }}
           />
         </Box>
       </div>

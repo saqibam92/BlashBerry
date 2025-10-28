@@ -113,18 +113,36 @@ const searchProducts = async (req, res) => {
 };
 
 // Get single product by slug
+// const getProduct = async (req, res) => {
+//   try {
+//     const product = await Product.findOne({
+//       slug: req.params.slug,
+//       isActive: true,
+//     }).populate("category", "name"); // --- FIX: Populate the category name ---
+
+//     if (!product) {
+//       return res
+//         .status(404)
+//         .json({ success: false, message: "Product not found" });
+//     }
+//     res.json({ success: true, data: product });
+//   } catch (error) {
+//     res.status(500).json({ success: false, message: error.message });
+//   }
+// };
+
 const getProduct = async (req, res) => {
   try {
     const product = await Product.findOne({
       slug: req.params.slug,
       isActive: true,
-    }).populate("category", "name"); // --- FIX: Populate the category name ---
+    }).populate("category", "name");
 
-    if (!product) {
+    if (!product)
       return res
         .status(404)
         .json({ success: false, message: "Product not found" });
-    }
+
     res.json({ success: true, data: product });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -178,32 +196,72 @@ const getSimilarProducts = async (req, res) => {
 };
 
 // Create product (Admin only)
+// const createProduct = async (req, res) => {
+//   try {
+//     const errors = validationResult(req);
+//     if (!errors.isEmpty()) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Validation failed",
+//         errors: errors.array(),
+//       });
+//     }
+
+//     const product = await Product.create(req.body);
+
+//     res.status(201).json({
+//       success: true,
+//       data: product,
+//     });
+//   } catch (error) {
+//     res.status(500).json({
+//       success: false,
+//       message: error.message,
+//     });
+//   }
+// };
+
+// // Update product (Admin only)
+// const updateProduct = async (req, res) => {
+//   try {
+//     const product = await Product.findByIdAndUpdate(req.params.id, req.body, {
+//       new: true,
+//       runValidators: true,
+//     });
+
+//     if (!product) {
+//       return res.status(404).json({
+//         success: false,
+//         message: "Product not found",
+//       });
+//     }
+
+//     res.json({
+//       success: true,
+//       data: product,
+//     });
+//   } catch (error) {
+//     res.status(500).json({
+//       success: false,
+//       message: error.message,
+//     });
+//   }
+// };
+
 const createProduct = async (req, res) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        message: "Validation failed",
-        errors: errors.array(),
-      });
+      return res.status(400).json({ success: false, errors: errors.array() });
     }
 
     const product = await Product.create(req.body);
-
-    res.status(201).json({
-      success: true,
-      data: product,
-    });
+    res.status(201).json({ success: true, data: product });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
-// Update product (Admin only)
 const updateProduct = async (req, res) => {
   try {
     const product = await Product.findByIdAndUpdate(req.params.id, req.body, {
@@ -211,22 +269,14 @@ const updateProduct = async (req, res) => {
       runValidators: true,
     });
 
-    if (!product) {
-      return res.status(404).json({
-        success: false,
-        message: "Product not found",
-      });
-    }
+    if (!product)
+      return res
+        .status(404)
+        .json({ success: false, message: "Product not found" });
 
-    res.json({
-      success: true,
-      data: product,
-    });
+    res.json({ success: true, data: product });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
