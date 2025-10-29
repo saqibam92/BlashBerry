@@ -10,6 +10,17 @@ const userSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    phone: {
+      type: String,
+      required: true,
+      validate: {
+        validator: function (v) {
+          // Validate Bangladeshi phone number: +88 followed by 11 digits
+          return /^(\+8801\d{9}|01\d{9})$/.test(v);
+        },
+        message: (props) => `${props.value} is not a valid mobile number!`,
+      },
+    },
     email: {
       type: String,
       required: true,

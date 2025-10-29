@@ -5,6 +5,7 @@ const authRoutes = require("./auth");
 const productRoutes = require("./products");
 const orderRoutes = require("./orders");
 const categoryRoutes = require("./category");
+const videoRoutes = require("./video");
 
 const loadRoutes = (app) => {
   // Health check endpoint
@@ -21,6 +22,7 @@ const loadRoutes = (app) => {
   app.use("/api/products", productRoutes);
   app.use("/api/orders", orderRoutes);
   app.use("/api/category", categoryRoutes);
+  app.use("/api/video", videoRoutes);
 };
 
 module.exports = { loadRoutes };

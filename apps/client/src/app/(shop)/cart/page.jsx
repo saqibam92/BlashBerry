@@ -4,7 +4,7 @@ import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   Box,
-  Button,
+  // Button,
   Typography,
   Paper,
   Grid,
@@ -12,12 +12,14 @@ import {
   TextField,
   Divider,
   Container,
+  Skeleton,
 } from "@mui/material";
 import { Delete } from "@mui/icons-material";
 import Link from "next/link";
 import Image from "next/image";
 import { formatPrice } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import Button from "@/components/ui/Button";
 
 export default function CartPage() {
   const {
@@ -27,12 +29,66 @@ export default function CartPage() {
     getCartTotal,
     getCartItemCount,
   } = useCart();
-  const { isAuthenticated } = useAuth();
+  // const { isAuthenticated } = useAuth();
   const router = useRouter();
 
   const handleCheckout = () => {
     router.push("/checkout");
   };
+  // 🌀 Loading skeleton
+  if (loading) {
+    return (
+      <Container sx={{ py: 6 }}>
+        <Typography variant="h4" gutterBottom>
+          Loading your cart...
+        </Typography>
+        <Grid container spacing={4}>
+          <Grid item xs={12} md={8}>
+            {[1, 2, 3].map((i) => (
+              <Paper
+                key={i}
+                sx={{ display: "flex", alignItems: "center", mb: 2, p: 2 }}
+              >
+                <Skeleton
+                  variant="rectangular"
+                  width={100}
+                  height={100}
+                  sx={{ borderRadius: 1 }}
+                />
+                <Box sx={{ flexGrow: 1, ml: 2 }}>
+                  <Skeleton width="60%" height={24} />
+                  <Skeleton width="40%" height={20} />
+                  <Skeleton width="30%" height={20} />
+                </Box>
+                <Skeleton
+                  variant="rectangular"
+                  width={70}
+                  height={40}
+                  sx={{ borderRadius: 1 }}
+                />
+              </Paper>
+            ))}
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <Paper sx={{ p: 3 }}>
+              <Skeleton width="50%" height={30} />
+              <Divider sx={{ my: 2 }} />
+              <Skeleton width="80%" height={24} />
+              <Skeleton width="70%" height={24} />
+              <Divider sx={{ my: 2 }} />
+              <Skeleton width="60%" height={30} />
+              <Skeleton
+                variant="rectangular"
+                width="100%"
+                height={45}
+                sx={{ mt: 3, borderRadius: 2 }}
+              />
+            </Paper>
+          </Grid>
+        </Grid>
+      </Container>
+    );
+  }
 
   if (getCartItemCount() === 0) {
     return (
@@ -40,9 +96,15 @@ export default function CartPage() {
         <Typography variant="h4" gutterBottom>
           Your Cart is Empty
         </Typography>
-        <Button component={Link} href="/products" variant="contained">
-          Continue Shopping
-        </Button>
+        <Link href="/products">
+          <Button
+            variant="default"
+            size="lg"
+            className="bg-pink-500/90 hover:bg-pink-600 text-white"
+          >
+            Continue Shopping
+          </Button>
+        </Link>
       </Container>
     );
   }
@@ -60,15 +122,20 @@ export default function CartPage() {
               sx={{ display: "flex", alignItems: "center", mb: 2, p: 2 }}
               elevation={2}
             >
-              <Image
-                src={item.product.images[0]}
-                alt={item.product.name}
-                width={100}
-                height={100}
-                style={{ objectFit: "cover", borderRadius: "8px" }}
-              />
+              <Link href={`/products/${item.product.slug}`}>
+                <Image
+                  src={item.product.images[0]}
+                  alt={item.product.name}
+                  width={100}
+                  height={100}
+                  style={{ objectFit: "cover", borderRadius: "8px" }}
+                />
+              </Link>
               <Box sx={{ flexGrow: 1, ml: 2 }}>
-                <Typography variant="h6">{item.product.name}</Typography>
+                <Link href={`/products/${item.product.slug}`}>
+                  <Typography variant="h6">{item.product.name}</Typography>
+                </Link>
+
                 <Typography color="text.secondary">
                   Size: {item.size}
                 </Typography>
@@ -124,14 +191,16 @@ export default function CartPage() {
                 {formatPrice(getCartTotal())}
               </Typography>
             </Box>
+
             <Button
               onClick={handleCheckout}
-              variant="contained"
-              fullWidth
-              size="large"
-              sx={{ mt: 2 }}
+              variant="outline"
+              // fullWidth
+              size="lg"
+              className="w-full mt-2 bg-pink-500/90 hover:bg-pink-600 text-white"
             >
-              {isAuthenticated ? "Proceed to Checkout" : "Login to Checkout"}
+              {/* {isAuthenticated ? "Proceed to Checkout" : "Login to Checkout"} */}
+              Checkout
             </Button>
           </Paper>
         </Grid>

@@ -12,19 +12,26 @@ import {
 } from "@mui/material";
 import { createAdminCategory } from "@/lib/adminApi";
 import toast from "react-hot-toast";
+import ImageUploader from "./ImageUploader";
 
 export default function CategoryCreator({ open, onClose, onCategoryCreated }) {
   const [formData, setFormData] = useState({
     name: "",
     image: "",
+    images: [],
     priority: 10,
   });
 
   const handleSave = async () => {
-    await toast.promise(createAdminCategory(formData), {
+    const payload = {
+      name: formData.name,
+      image: formData.images[0] || formData.image, // fallback
+      priority: formData.priority,
+    };
+    await toast.promise(createAdminCategory(payload), {
       loading: "Creating category...",
       success: (res) => {
-        onCategoryCreated(res.data.data); // Pass the new category back
+        onCategoryCreated(res.data.data);
         onClose();
         return "Category created!";
       },
@@ -48,10 +55,16 @@ export default function CategoryCreator({ open, onClose, onCategoryCreated }) {
           value={formData.name}
           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
         />
-        <TextField
+        {/* <TextField
           label="Image URL"
           value={formData.image}
-          onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+          onChange={(e) => setFormData({ ...formData, image: e.target.value })} */}
+        {/* /> */}
+        <ImageUploader
+          images={formData.images || []}
+          onChange={(newImages) =>
+            setFormData((prev) => ({ ...prev, images: newImages }))
+          }
         />
       </DialogContent>
       <DialogActions>

@@ -2,9 +2,10 @@
 
 "use client";
 import { useSearchParams } from "next/navigation";
-import { Box, Typography, Button, Paper, Container } from "@mui/material";
+import { Box, Typography, Paper, Container } from "@mui/material";
 import Link from "next/link";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import Button from "@/components/ui/Button";
 
 export default function OrderCompletePage() {
   const searchParams = useSearchParams();
@@ -23,7 +24,13 @@ export default function OrderCompletePage() {
         <Typography sx={{ my: 2 }}>
           We have received your order and will begin processing it shortly.
         </Typography>
-        <Button component={Link} href="/" variant="contained">
+        <Button
+          size="lg"
+          className="bg-pink-500/50"
+          component={Link}
+          href="/"
+          variant="contained"
+        >
           Continue Shopping
         </Button>
       </Paper>

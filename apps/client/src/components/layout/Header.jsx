@@ -1,23 +1,30 @@
 // File: apps/client/src/components/layout/Header.jsx
-
 "use client";
 import Link from "next/link";
 import { useState } from "react";
-import { ShoppingCart, User, Menu, X, Search } from "lucide-react";
+import { ShoppingCart, User, Menu, X, Package, Search } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
+import { useRouter } from "next/navigation";
 import { SearchBar } from "./SearchBar";
+import { LocalShipping } from "@mui/icons-material";
+import { Tooltip, IconButton } from "@mui/material";
 
 const Header = () => {
-  const { getCartItemCount } = useCart();
+  const { getCartItemCount, loading: isCartLoading } = useCart();
   const itemCount = getCartItemCount();
+  const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   const navLinks = [
     { href: "/products", label: "Shop" },
     { href: "#", label: "New Arrivals" },
     { href: "#", label: "Sales" },
   ];
+
+  // ✅ When user clicks the icon, redirect directly to /orders/search
+  const handleUserClick = () => {
+    router.push("/orders/tracking");
+  };
 
   return (
     <header className="bg-white shadow-sm sticky top-0 z-40">
@@ -35,13 +42,18 @@ const Header = () => {
             <Menu className="h-6 w-6" aria-hidden="true" />
           </button>
         </div>
+
         {/* Logo */}
         <div className="flex lg:flex-1">
           <Link
             href="/"
             className="-m-1.5 p-1.5 text-2xl font-bold text-primary-600"
           >
-            BlashBerry
+            <img
+              className="max-w-[50%]"
+              src={"/blashberry_logo.png"}
+              alt="BlashBerry Logo"
+            />
           </Link>
         </div>
 
@@ -64,18 +76,27 @@ const Header = () => {
         </div>
 
         {/* Icons (Desktop) */}
-        <div className="flex-row flex justify-end items-center">
-          <Link href="/cart" className="relative">
+        <div className="flex items-center justify-end relative">
+          {/* Cart Icon */}
+          <Link href="/cart" className="relative mr-4">
             <ShoppingCart className="h-6 w-6 text-gray-600 hover:text-primary-600" />
-            {itemCount > 0 && (
-              <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-primary-600 text-xs bolder text-dark">
+            {!isCartLoading && itemCount > 0 && (
+              <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-primary-600 text-xs font-bold text-dark">
                 {itemCount}
               </span>
             )}
           </Link>
-          <Link href="/auth/login">
-            <User className="h-6 w-6 text-gray-600 hover:text-primary-600" />
-          </Link>
+
+          {/* ✅ User Icon: redirects to /orders/search */}
+          <button
+            onClick={handleUserClick}
+            className="cursor-pointer focus:outline-none"
+            aria-label="Check Orders"
+            alt="check-tracker"
+          >
+            <LocalShipping className="h-6 w-6 text-gray-600 hover:text-primary-600" />
+            {/* <User className="h-6 w-6 text-gray-600 hover:text-primary-600" /> */}
+          </button>
         </div>
       </nav>
 
@@ -85,8 +106,11 @@ const Header = () => {
         role="dialog"
         aria-modal="true"
       >
-        <div className="fixed inset-0 z-50" />
-        <div className="fixed inset-y-0 left-0 z-50 w-full overflow-y-auto bg-white px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10">
+        <div
+          className="fixed inset-0 z-50 bg-black/20"
+          onClick={() => setIsMenuOpen(false)}
+        />
+        <div className="fixed inset-y-0 left-0 z-50 w-full sm:max-w-sm bg-white px-6 py-6 overflow-y-auto sm:ring-1 sm:ring-gray-900/10">
           <div className="flex items-center justify-between">
             <Link
               href="/"
@@ -114,10 +138,22 @@ const Header = () => {
                     key={link.label}
                     href={link.href}
                     className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
+                    onClick={() => setIsMenuOpen(false)}
                   >
                     {link.label}
                   </Link>
                 ))}
+
+                {/* ✅ Mobile: Orders Search Shortcut */}
+                <button
+                  onClick={() => {
+                    router.push("/orders/tracking");
+                    setIsMenuOpen(false);
+                  }}
+                  className="-mx-3 block w-full text-left rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
+                >
+                  Track Your Orders
+                </button>
               </div>
             </div>
           </div>

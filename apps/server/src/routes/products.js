@@ -13,6 +13,14 @@ const {
   deleteProduct,
   createProductReview,
   getCategories,
+  getCategoryProducts,
+  importProductsCSV,
+  previewCSVImport,
+  confirmCSVImport,
+  uploadImage,
+  getTrendingProducts,
+  getBestSellerProducts,
+  getNewArrivalProducts,
 } = require("../controllers/productController");
 const { protect, admin } = require("../middleware/auth");
 const Banner = require("../models/Banner");
@@ -51,8 +59,12 @@ const productValidation = [
 router.get("/", getProducts);
 router.get("/search", searchProducts);
 router.get("/featured", getFeaturedProducts);
+router.get("/trending", getTrendingProducts);
+router.get("/bestsellers", getBestSellerProducts);
+router.get("/newarrivals", getNewArrivalProducts);
 router.get("/:slug", getProduct);
 router.get("/:slug/similar", getSimilarProducts);
+router.get("/category/:categoryId", getCategoryProducts);
 router.post("/:slug/reviews", protect, createProductReview);
 // router.get("/categories", getCategories);
 
@@ -70,5 +82,23 @@ router.get("/banners/active", async (req, res) => {
 router.post("/", protect, admin, productValidation, createProduct);
 router.put("/:id", protect, admin, updateProduct);
 router.delete("/:id", protect, admin, deleteProduct);
+router.post("/import", protect, admin, importProductsCSV);
+router.post("/import/preview", protect, admin, previewCSVImport);
+router.post("/import/confirm", protect, admin, confirmCSVImport);
+router.post(
+  "/upload-image",
+  protect,
+  admin,
+  uploadImage.array("images", 6),
+  (req, res) => {
+    if (!req.files?.length) {
+      return res
+        .status(400)
+        .json({ success: false, message: "No files uploaded" });
+    }
+    const urls = req.files.map((f) => `/uploads/products/${f.filename}`);
+    res.json({ success: true, urls });
+  }
+);
 
 module.exports = router;

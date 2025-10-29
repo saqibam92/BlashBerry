@@ -1,37 +1,92 @@
 // File: apps/client/src/app/(shop)/page.js (Homepage)
+import ProductCarousel from "@/components/common/ProductCarousel";
 import BannerSlider from "@/components/home/BannerSlider";
-import HomePageClient from "@/components/home/HomePageClient"; // <-- Import the new Client Component
-import { getFeaturedProducts, getActiveBanners } from "@/lib/productApi";
+import HomePageClient from "@/components/home/HomePageClient";
+import VideoSection from "@/components/home/VideoSection";
+import WhatsNew from "@/components/home/WhatsNew";
+import {
+  getFeaturedProducts,
+  getActiveBanners,
+  getCategories,
+  getSelectedVideo,
+  getTrendingProducts,
+  getBestSellerProducts,
+  getNewArrivalProducts,
+} from "@/lib/productApi";
 
 // This function fetches data on the server.
 async function getHomePageData() {
   try {
-    const [bannersRes, products] = await Promise.all([
+    const [
+      bannersRes,
+      featured,
+      categoriesRes,
+      videoRes,
+      trending,
+      bestSellers,
+      newArrivals,
+    ] = await Promise.all([
       getActiveBanners(),
       getFeaturedProducts(),
+      getCategories(),
+      getSelectedVideo(),
+      getTrendingProducts(),
+      getBestSellerProducts(),
+      getNewArrivalProducts(),
     ]);
+    // console.log("vid: ", videoRes);
 
     const banners = bannersRes?.data?.data || [];
-    return { banners, products };
+    const categories = categoriesRes?.data || [];
+    const video = videoRes?.data || [];
+    // console.log("Video: ", videoRes.data);
+    return {
+      banners,
+      featured,
+      categories,
+      video,
+      trending,
+      bestSellers,
+      newArrivals,
+    };
   } catch (error) {
     console.error("Failed to fetch homepage data:", error.message);
-    return { banners: [], products: [] };
+    return {
+      banners: [],
+      featured: [],
+      categories: [],
+      videos: [],
+      trending: [],
+      bestSellers: [],
+      newArrivals: [],
+    };
   }
 }
 
-// This is your main Server Component for the homepage.
 export default async function HomePage() {
-  // It fetches data...
-  const { banners, products } = await getHomePageData();
+  const {
+    banners,
+    featured,
+    categories,
+    video,
+    trending,
+    bestSellers,
+    newArrivals,
+  } = await getHomePageData();
+  console.log("Banners", banners);
 
-  // ...and then passes that data as props to the Client Components.
   return (
     <div className="bg-white">
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <BannerSlider banners={banners} />
-
+        <WhatsNew categories={categories} />
         {/* The client component handles all the interactive parts. */}
-        <HomePageClient products={products} />
+        {/* <HomePageClient products={products} /> */}
+        <ProductCarousel title="Featured Products" products={featured} />
+        <ProductCarousel title="Trending Now" products={trending} />
+        <ProductCarousel title="Best Sellers" products={bestSellers} />
+        <ProductCarousel title="New Arrivals" products={newArrivals} />
+        <VideoSection video={video} />
       </div>
     </div>
   );

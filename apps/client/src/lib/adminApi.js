@@ -2,6 +2,17 @@
 
 import api from "./api";
 
+// Dashboard Stats
+export const getDashboardStats = async () => {
+  try {
+    const res = await api.get("/api/admin/stats");
+    return res.data.data;
+  } catch (error) {
+    console.error("Failed to fetch dashboard stats:", error);
+    return null;
+  }
+};
+
 // --- CATEGORY APIS ---
 export const getAdminCategories = () => api.get("/api/admin/categories");
 export const createAdminCategory = (data) =>
@@ -45,3 +56,53 @@ export const uploadBannerImage = (formData) =>
   api.post("/api/admin/upload/banner", formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
+
+export const getAdminVideos = async () => {
+  try {
+    const response = await api.get("/api/video/admin");
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch videos:", error);
+    return { success: false, data: [] };
+  }
+};
+
+export const createAdminVideo = async (videoData) => {
+  try {
+    const response = await api.post("/api/videos", videoData);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to create video:", error);
+    throw error;
+  }
+};
+
+export const updateAdminVideo = async (id, videoData) => {
+  try {
+    const response = await api.put(`/api/videos/${id}`, videoData);
+    return response.data;
+  } catch (error) {
+    console.error(`Failed to update video ${id}:`, error);
+    throw error;
+  }
+};
+
+export const deleteAdminVideo = async (id) => {
+  try {
+    const response = await api.delete(`/api/videos/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Failed to delete video ${id}:`, error);
+    throw error;
+  }
+};
+
+export const uploadProductImages = async (files) => {
+  const formData = new FormData();
+  files.forEach((file) => formData.append("images", file));
+
+  const res = await api.post("/api/products/upload-image", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return res.data.urls;
+};

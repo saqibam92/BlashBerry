@@ -68,7 +68,7 @@ function SearchResults() {
   return (
     <div className="container mx-auto px-4 py-8">
       {query ? (
-        <h1 className="text-3xl font-bold mb-8">
+        <h1 className="text-lg font-bold mb-8">
           Search results for:{" "}
           <span className="text-primary-600">"{query}"</span>
         </h1>
