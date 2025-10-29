@@ -18,7 +18,7 @@ import toast from "react-hot-toast";
 
 export default function AdminLoginPage() {
   const router = useRouter();
-  const { login, isAuthenticated, user } = useAuth(); // Get auth state
+  const { login, isAuthenticated, user } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
