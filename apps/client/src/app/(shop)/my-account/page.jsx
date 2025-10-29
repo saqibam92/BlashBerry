@@ -1,4 +1,5 @@
 // File: apps/client/src/app/(shop)/my-account/page.jsx
+
 "use client";
 import { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";

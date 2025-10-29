@@ -1,6 +1,7 @@
 // apps/client/src/app/(shop)/order-complete/page.jsx
 
 "use client";
+
 import { useSearchParams } from "next/navigation";
 import { Box, Typography, Paper, Container } from "@mui/material";
 import Link from "next/link";
