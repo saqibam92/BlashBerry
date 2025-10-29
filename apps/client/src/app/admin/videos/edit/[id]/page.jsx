@@ -3,9 +3,9 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-import VideoForm from "../../VideoForm";
 import { Box, Typography, CircularProgress } from "@mui/material";
 import { getAdminVideos } from "@/lib/adminApi";
+import VideoForm from "@/components/admin/VideoForm";
 
 export default function EditVideoPage() {
   const { id } = useParams();
