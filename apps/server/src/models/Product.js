@@ -52,7 +52,8 @@ const productSchema = new mongoose.Schema(
     },
     stockQuantity: { type: Number, required: true, default: 0, min: 0 },
     brand: { type: String, trim: true },
-    sku: { type: String, trim: true, unique: true, sparse: true },
+    sku: { type: String, trim: true, sparse: true },
+    // sku: { type: String, trim: true, unique: true, sparse: true },
     tags: [{ type: String, trim: true }],
     discount: {
       discountType: {

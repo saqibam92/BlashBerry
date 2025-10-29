@@ -113,7 +113,7 @@ export default function OrderTrackingPage() {
       toast.error("Enter a phone number first");
       return;
     }
-    router.push(`/orders/${id}?phone=${encodeURIComponent(phone.trim())}`);
+    router.push(`/orders/${id}?phone=${encodeURIComponent(phone)}`);
   };
 
   return (

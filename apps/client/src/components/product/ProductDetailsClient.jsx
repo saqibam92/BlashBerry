@@ -35,7 +35,7 @@ export default function ProductDetailsClient({ product, similarProducts }) {
     <div className="bg-white">
       <div className="pt-6">
         <div className="mx-auto mt-6 max-w-2xl sm:px-6 lg:max-w-7xl lg:px-8">
-          <Breadcrumbs aria-label="breadcrumb" sx={{ mb: 2 }}>
+          {/* <Breadcrumbs aria-label="breadcrumb" sx={{ mb: 2 }}>
             <Link href="/" className="hover:underline">
               Home
             </Link>
@@ -45,7 +45,7 @@ export default function ProductDetailsClient({ product, similarProducts }) {
             <Typography color="text.primary">
               {product.category?.name}
             </Typography>
-          </Breadcrumbs>
+          </Breadcrumbs> */}
 
           <div className="lg:grid lg:grid-cols-2 lg:gap-x-8">
             <ProductGallery images={product.images} altText={product.name} />
@@ -57,6 +57,16 @@ export default function ProductDetailsClient({ product, similarProducts }) {
               {product.model && (
                 <p className="text-lg text-gray-600">Model: {product.model}</p>
               )}
+
+              {/* --- Description --- */}
+              <div className="mt-10">
+                <h3 className="text-sm font-medium text-gray-900">
+                  Description
+                </h3>
+                <div className="mt-4 prose prose-sm text-gray-700">
+                  <p>{product.description}</p>
+                </div>
+              </div>
               <p className="text-3xl tracking-tight text-gray-900 mt-4">
                 {formatPrice(product.price)}
               </p>
@@ -65,15 +75,36 @@ export default function ProductDetailsClient({ product, similarProducts }) {
               <div className="mt-10 bg-gray-50 p-6 rounded-lg">
                 <h3 className="text-lg font-semibold mb-4">Product Details</h3>
                 <Stack spacing={1}>
-                  <DetailRow label="Material" value={product.material} />
-                  <DetailRow label="Bra Design" value={product.braDesign} />
-                  <DetailRow label="Support Type" value={product.supportType} />
-                  <DetailRow label="Cup Shape" value={product.cupShape} />
-                  <DetailRow label="Closure" value={product.closureType} />
-                  <DetailRow label="Straps" value={product.strapType} />
-                  <DetailRow label="Decoration" value={product.decoration} />
-                  <DetailRow label="Panty Type" value={product.pantyType} />
-                  <DetailRow label="Rise" value={product.riseType} />
+                  <DetailRow
+                    label="Material"
+                    value={product.details.material}
+                  />
+                  <DetailRow
+                    label="Bra Design"
+                    value={product.details.braDesign}
+                  />
+                  <DetailRow
+                    label="Support Type"
+                    value={product.details.supportType}
+                  />
+                  <DetailRow
+                    label="Cup Shape"
+                    value={product.details.cupShape}
+                  />
+                  <DetailRow
+                    label="Closure"
+                    value={product.details.closureType}
+                  />
+                  <DetailRow label="Straps" value={product.details.strapType} />
+                  <DetailRow
+                    label="Decoration"
+                    value={product.details.decoration}
+                  />
+                  <DetailRow
+                    label="Panty Type"
+                    value={product.details.pantyType}
+                  />
+                  <DetailRow label="Rise" value={product.details.riseType} />
                   <DetailRow
                     label="Removable Pads"
                     value={product.removablePads ? "Yes" : "No"}
@@ -101,16 +132,6 @@ export default function ProductDetailsClient({ product, similarProducts }) {
                     </div>
                   </>
                 )}
-              </div>
-
-              {/* --- Description --- */}
-              <div className="mt-10">
-                <h3 className="text-sm font-medium text-gray-900">
-                  Description
-                </h3>
-                <div className="mt-4 prose prose-sm text-gray-700">
-                  <p>{product.description}</p>
-                </div>
               </div>
 
               {/* --- Size Selector --- */}

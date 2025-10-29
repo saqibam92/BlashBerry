@@ -21,7 +21,7 @@ const Header = () => {
 
   // ✅ When user clicks the icon, redirect directly to /orders/search
   const handleUserClick = () => {
-    router.push("/orders/search");
+    router.push("/orders/tracking");
   };
 
   return (
@@ -143,7 +143,7 @@ const Header = () => {
                 {/* ✅ Mobile: Orders Search Shortcut */}
                 <button
                   onClick={() => {
-                    router.push("/orders/search");
+                    router.push("/orders/tracking");
                     setIsMenuOpen(false);
                   }}
                   className="-mx-3 block w-full text-left rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"

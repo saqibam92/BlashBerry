@@ -34,6 +34,8 @@ export const getFeaturedProducts = async () => {
 export const getAllProducts = async (params = {}) => {
   try {
     const response = await api.get("/api/products", { params });
+    console.log("res 1: ", response.data);
+    console.log("res 2: ", response.data.data);
     return response.data;
   } catch (error) {
     console.error("Failed to fetch products:", error);

@@ -25,7 +25,13 @@ import {
   CardContent,
   Grid,
 } from "@mui/material";
-import { Edit, Delete, Add, Visibility } from "@mui/icons-material";
+import {
+  Edit,
+  Delete,
+  Add,
+  Visibility,
+  CloudUpload,
+} from "@mui/icons-material";
 import {
   getAdminProducts,
   deleteAdminProduct,
@@ -101,9 +107,13 @@ export default function AdminProductsPage() {
     }
   };
 
+  const handleImportCSV = () => {
+    router.push("/admin/products/import");
+  };
+
   return (
     <Box>
-      <Box
+      {/* <Box
         sx={{
           display: "flex",
           justifyContent: "space-between",
@@ -119,8 +129,34 @@ export default function AdminProductsPage() {
         >
           Add New Product
         </Button>
-      </Box>
+      </Box> */}
 
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 4,
+        }}
+      >
+        <Typography variant="h4">Product List</Typography>
+        <Box sx={{ display: "flex", gap: 2 }}>
+          <Button
+            variant="outlined"
+            startIcon={<CloudUpload />}
+            onClick={handleImportCSV}
+          >
+            Import CSV
+          </Button>
+          <Button
+            variant="contained"
+            startIcon={<Add />}
+            onClick={() => router.push("/admin/products/add")}
+          >
+            Add New Product
+          </Button>
+        </Box>
+      </Box>
       {/* Filter Section */}
       <Card component={Paper} elevation={2} sx={{ mb: 4 }}>
         <CardContent>
@@ -170,6 +206,7 @@ export default function AdminProductsPage() {
               <TableCell>Product Name</TableCell>
               <TableCell>Category</TableCell>
               <TableCell>Unit Price</TableCell>
+              <TableCell>Model</TableCell>
               <TableCell>Featured</TableCell>
               <TableCell>Status</TableCell>
               <TableCell>In stock</TableCell>
@@ -194,22 +231,11 @@ export default function AdminProductsPage() {
                 <TableCell>{product.category?.name}</TableCell>
                 <TableCell>{formatPrice(product.price)}</TableCell>
                 <TableCell>
-                  <Box sx={{ display: "flex", alignItems: "center" }}>
-                    <Avatar
-                      src={product.images[0]}
-                      alt={product.name}
-                      variant="rounded"
-                      sx={{ mr: 2 }}
-                    />
-                    <div>
-                      <div>{product.name}</div>
-                      {product.details?.model && (
-                        <Typography variant="caption" color="text.secondary">
-                          Model: {product.details.model}
-                        </Typography>
-                      )}
-                    </div>
-                  </Box>
+                  {product.details?.model && (
+                    <Typography variant="caption" color="text.secondary">
+                      {product.details.model}
+                    </Typography>
+                  )}
                 </TableCell>
                 <TableCell>
                   <Switch

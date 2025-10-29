@@ -13,7 +13,7 @@ export default function ProductList({
   title = "Shop All Products",
   initialFilters = { page: 1, limit: 9, sort: "newest" },
   categories = [],
-  initialProducts = null, // New prop for server-fetched products
+  initialProducts = null,
 }) {
   const [products, setProducts] = useState(initialProducts?.data || []);
   const [pagination, setPagination] = useState(

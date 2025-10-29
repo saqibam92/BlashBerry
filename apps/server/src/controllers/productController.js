@@ -4,6 +4,53 @@ const Category = require("../models/Category");
 const Product = require("../models/Product");
 const { validationResult } = require("express-validator");
 const mongoose = require("mongoose");
+const multer = require("multer");
+const csv = require("csv-parser");
+const fs = require("fs");
+const path = require("path");
+
+// Configure multer for CSV upload
+const csvStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const dir = "uploads/csv/";
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    cb(null, dir);
+  },
+  filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname),
+});
+const upload = multer({ storage: csvStorage });
+
+// --- Multer for image upload ---
+const imageStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const dir = path.join(__dirname, "../../../client/public/uploads/products");
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    cb(null, dir);
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    cb(null, Date.now() + "-" + Math.round(Math.random() * 1e9) + ext);
+  },
+});
+
+const uploadImage = multer({
+  storage: imageStorage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+  fileFilter: (req, file, cb) => {
+    const allowed = /jpeg|jpg|png|webp/;
+    const ext = path.extname(file.originalname).toLowerCase();
+    const mime = file.mimetype;
+    if (allowed.test(ext) && allowed.test(mime)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only images (jpeg, jpg, png, webp) allowed"));
+    }
+  },
+});
 
 // Get all products with filtering and pagination
 const getProducts = async (req, res) => {
@@ -20,10 +67,8 @@ const getProducts = async (req, res) => {
       search,
     } = req.query;
 
-    // Build query object
     let query = { isActive: true };
 
-    // If a category query parameter exists, split it by commas and use the $in operator.
     if (category) {
       query.category = { $in: category.split(",") };
     }
@@ -35,11 +80,9 @@ const getProducts = async (req, res) => {
     }
     if (rating) query.rating = { $gte: Number(rating) };
     if (search) {
-      // Use a regex for partial matching on the search page
       query.name = { $regex: search, $options: "i" };
     }
 
-    // Build sort object
     let sortObj = {};
     switch (sort) {
       case "price_asc":
@@ -58,7 +101,6 @@ const getProducts = async (req, res) => {
         sortObj.createdAt = -1;
     }
 
-    // Execute query with pagination
     const skip = (page - 1) * limit;
     const products = await Product.find(query)
       .populate("category", "name")
@@ -87,7 +129,6 @@ const getProducts = async (req, res) => {
   }
 };
 
-// --- FUNCTION FOR LIVE SEARCH ---
 const searchProducts = async (req, res) => {
   try {
     const { term } = req.query;
@@ -96,9 +137,9 @@ const searchProducts = async (req, res) => {
     }
 
     const products = await Product.find({
-      name: { $regex: term, $options: "i" }, // Case-insensitive regex search
+      name: { $regex: term, $options: "i" },
       isActive: true,
-    }).limit(4); // Limit to 4 results for the dropdown
+    }).limit(4);
 
     res.json({
       success: true,
@@ -111,25 +152,6 @@ const searchProducts = async (req, res) => {
     });
   }
 };
-
-// Get single product by slug
-// const getProduct = async (req, res) => {
-//   try {
-//     const product = await Product.findOne({
-//       slug: req.params.slug,
-//       isActive: true,
-//     }).populate("category", "name"); // --- FIX: Populate the category name ---
-
-//     if (!product) {
-//       return res
-//         .status(404)
-//         .json({ success: false, message: "Product not found" });
-//     }
-//     res.json({ success: true, data: product });
-//   } catch (error) {
-//     res.status(500).json({ success: false, message: error.message });
-//   }
-// };
 
 const getProduct = async (req, res) => {
   try {
@@ -149,12 +171,10 @@ const getProduct = async (req, res) => {
   }
 };
 
-// Get featured products
 const getFeaturedProducts = async (req, res) => {
   try {
     const products = await Product.find({
       isFeatured: true,
-      // isActive: true,
     }).limit(8);
 
     res.json({
@@ -169,10 +189,8 @@ const getFeaturedProducts = async (req, res) => {
   }
 };
 
-// Get similar products
 const getSimilarProducts = async (req, res) => {
   try {
-    // --- FIX: Use findOne to get a single product object ---
     const product = await Product.findOne({ slug: req.params.slug });
 
     if (!product || !product.category) {
@@ -183,10 +201,10 @@ const getSimilarProducts = async (req, res) => {
 
     const similarProducts = await Product.find({
       category: product.category,
-      _id: { $ne: product._id }, // Exclude the product itself
+      _id: { $ne: product._id },
       isActive: true,
     })
-      .populate("category", "name") // --- FIX: Also populate category for the cards ---
+      .populate("category", "name")
       .limit(4);
 
     res.json({ success: true, data: similarProducts });
@@ -194,59 +212,6 @@ const getSimilarProducts = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
-
-// Create product (Admin only)
-// const createProduct = async (req, res) => {
-//   try {
-//     const errors = validationResult(req);
-//     if (!errors.isEmpty()) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "Validation failed",
-//         errors: errors.array(),
-//       });
-//     }
-
-//     const product = await Product.create(req.body);
-
-//     res.status(201).json({
-//       success: true,
-//       data: product,
-//     });
-//   } catch (error) {
-//     res.status(500).json({
-//       success: false,
-//       message: error.message,
-//     });
-//   }
-// };
-
-// // Update product (Admin only)
-// const updateProduct = async (req, res) => {
-//   try {
-//     const product = await Product.findByIdAndUpdate(req.params.id, req.body, {
-//       new: true,
-//       runValidators: true,
-//     });
-
-//     if (!product) {
-//       return res.status(404).json({
-//         success: false,
-//         message: "Product not found",
-//       });
-//     }
-
-//     res.json({
-//       success: true,
-//       data: product,
-//     });
-//   } catch (error) {
-//     res.status(500).json({
-//       success: false,
-//       message: error.message,
-//     });
-//   }
-// };
 
 const createProduct = async (req, res) => {
   try {
@@ -280,7 +245,6 @@ const updateProduct = async (req, res) => {
   }
 };
 
-// Delete product (Admin only)
 const deleteProduct = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
@@ -292,7 +256,6 @@ const deleteProduct = async (req, res) => {
       });
     }
 
-    // Soft delete
     product.isActive = false;
     await product.save();
 
@@ -308,7 +271,156 @@ const deleteProduct = async (req, res) => {
   }
 };
 
-// ---Create a new review ---
+const importProductsCSV = (req, res) => {
+  upload.single("csvFile")(req, res, async (err) => {
+    if (err) {
+      return res.status(400).json({ success: false, message: "Upload failed" });
+    }
+
+    if (!req.file) {
+      return res
+        .status(400)
+        .json({ success: false, message: "No CSV file uploaded" });
+    }
+
+    const results = [];
+    fs.createReadStream(req.file.path)
+      .pipe(csv())
+      .on("data", (data) => results.push(data))
+      .on("end", async () => {
+        try {
+          const products = results.map((row) => ({
+            name: row.name,
+            description: row.description,
+            price: parseFloat(row.price),
+            stockQuantity: parseInt(row.stockQuantity),
+            category: row.categoryId,
+            images: [row.imageUrl],
+            brand: row.brand,
+            sku: row.sku,
+            sizes: row.sizes ? row.sizes.split(",") : [],
+            colors: row.colors ? row.colors.split(",") : [],
+            tags: row.tags ? row.tags.split(",") : [],
+            details: {
+              material: row.material,
+              model: row.model,
+              braDesign: row.braDesign,
+              supportType: row.supportType,
+              cupShape: row.cupShape,
+              closureType: row.closureType,
+              strapType: row.strapType,
+              decoration: row.decoration,
+              feature: row.feature,
+              pantyType: row.pantyType,
+              riseType: row.riseType,
+              removablePads: row.removablePads === "true",
+              ecoFriendly: row.ecoFriendly === "true",
+              oemOdm: row.oemOdm === "true",
+              sampleLeadTime: row.sampleLeadTime,
+              origin: row.origin,
+            },
+            isActive: true,
+            isFeatured: false,
+          }));
+
+          const inserted = await Product.insertMany(products);
+          fs.unlinkSync(req.file.path);
+
+          res.json({
+            success: true,
+            message: `${inserted.length} products imported`,
+            data: inserted,
+          });
+        } catch (error) {
+          fs.unlinkSync(req.file.path);
+          res.status(500).json({ success: false, message: error.message });
+        }
+      });
+  });
+};
+
+const previewCSVImport = (req, res) => {
+  upload.single("csvFile")(req, res, async (err) => {
+    if (err || !req.file) {
+      return res
+        .status(400)
+        .json({ success: false, message: "CSV upload failed" });
+    }
+
+    const results = [];
+    const errors = [];
+    let rowNum = 1;
+
+    fs.createReadStream(req.file.path)
+      .pipe(csv())
+      .on("data", (row) => {
+        rowNum++;
+        const product = {
+          name: row.name?.trim(),
+          description: row.description?.trim(),
+          price: parseFloat(row.price),
+          stockQuantity: parseInt(row.stockQuantity),
+          category: row.categoryId?.trim(),
+          images: row.imageUrl ? [row.imageUrl.trim()] : [],
+          brand: row.brand?.trim(),
+          sku: row.sku?.trim(),
+          sizes: row.sizes ? row.sizes.split(",").map((s) => s.trim()) : [],
+          colors: row.colors ? row.colors.split(",").map((c) => c.trim()) : [],
+          tags: row.tags ? row.tags.split(",").map((t) => t.trim()) : [],
+          details: {
+            material: row.material?.trim(),
+            model: row.model?.trim(),
+            braDesign: row.braDesign?.trim(),
+            supportType: row.supportType?.trim(),
+            cupShape: row.cupShape?.trim(),
+            closureType: row.closureType?.trim(),
+            strapType: row.strapType?.trim(),
+            decoration: row.decoration?.trim(),
+            feature: row.feature?.trim(),
+            pantyType: row.pantyType?.trim(),
+            riseType: row.riseType?.trim(),
+            removablePads: row.removablePads === "true",
+            ecoFriendly: row.ecoFriendly === "true",
+            oemOdm: row.oemOdm === "true",
+            sampleLeadTime: row.sampleLeadTime?.trim(),
+            origin: row.origin?.trim(),
+          },
+        };
+
+        if (!product.name) errors.push(`Row ${rowNum}: Name missing`);
+        if (isNaN(product.price)) errors.push(`Row ${rowNum}: Invalid price`);
+        if (isNaN(product.stockQuantity))
+          errors.push(`Row ${rowNum}: Invalid stock`);
+        if (!product.category)
+          errors.push(`Row ${rowNum}: Category ID missing`);
+
+        results.push(product);
+      })
+      .on("end", () => {
+        fs.unlinkSync(req.file.path);
+        res.json({
+          success: true,
+          preview: results.slice(0, 10),
+          total: results.length,
+          errors,
+        });
+      });
+  });
+};
+
+const confirmCSVImport = async (req, res) => {
+  const { products } = req.body;
+  try {
+    const inserted = await Product.insertMany(products);
+    res.json({
+      success: true,
+      message: `${inserted.length} products imported`,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 const createProductReview = async (req, res) => {
   const { rating, comment } = req.body;
   const { slug } = req.params;
@@ -359,23 +471,12 @@ const createProductReview = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
-// --- Category Management ---
-// const getCategories = async (req, res) => {
-//   try {
-//     const categories = await Category.find();
-//     res.json({ success: true, data: categories });
-//   } catch (error) {
-//     res.status(500).json({ success: false, message: "Server Error" });
-//   }
-// };
 
-// Get products for a specific category
 const getCategoryProducts = async (req, res) => {
   try {
     const { page = 1, limit = 12, sort = "createdAt", search } = req.query;
     const { categoryId } = req.params;
 
-    // Validate categoryId
     if (!mongoose.Types.ObjectId.isValid(categoryId)) {
       return res.status(400).json({
         success: false,
@@ -383,14 +484,12 @@ const getCategoryProducts = async (req, res) => {
       });
     }
 
-    // Build query object
     let query = { isActive: true, category: categoryId };
 
     if (search) {
       query.name = { $regex: search, $options: "i" };
     }
 
-    // Build sort object
     let sortObj = {};
     switch (sort) {
       case "price_asc":
@@ -409,7 +508,6 @@ const getCategoryProducts = async (req, res) => {
         sortObj.createdAt = -1;
     }
 
-    // Execute query with pagination
     const skip = (page - 1) * limit;
     const products = await Product.find(query)
       .populate("category", "name")
@@ -438,10 +536,8 @@ const getCategoryProducts = async (req, res) => {
   }
 };
 
-// --- Get all unique categories from products ---
 const getCategories = async (req, res) => {
   try {
-    // This is more efficient as it only returns the unique category strings
     const categories = await Product.distinct("category", { isActive: true });
     res.json({ success: true, data: categories });
   } catch (error) {
@@ -461,4 +557,8 @@ module.exports = {
   createProductReview,
   getCategories,
   getCategoryProducts,
+  importProductsCSV,
+  uploadImage,
+  previewCSVImport,
+  confirmCSVImport,
 };
