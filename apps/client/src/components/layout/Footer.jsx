@@ -1,14 +1,12 @@
 // File: apps/client/src/components/layout/Footer.jsx
-// "use client";
+"use client";
 import Link from "next/link";
 import { Box, Typography, List, ListItem, Divider } from "@mui/material";
-import {
-  Facebook,
-  Instagram,
-  Youtube,
-  Linkedin,
-  Twitter as TikTok,
-} from "@mui/icons-material"; // TikTok as Twitter icon placeholder
+import Facebook from "@mui/icons-material/Facebook";
+import Instagram from "@mui/icons-material/Instagram";
+import Youtube from "@mui/icons-material/YouTube";
+import Linkedin from "@mui/icons-material/LinkedIn";
+import TikTok from "@mui/icons-material/Twitter";
 import Image from "next/image";
 
 export default function Footer() {
