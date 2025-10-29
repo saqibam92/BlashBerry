@@ -145,30 +145,19 @@ export default function Footer() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center text-gray-600">
         <Typography>&copy; BlashBerry. All Rights Reserved.</Typography>
         <Box className="flex space-x-4 mt-4 md:mt-0">
-          <Image
-            src="/payments/bkash.png"
-            alt="PayPal"
-            width={40}
-            height={25}
-            // style={{ objectFit: "contain" }}
-            style={{ width: "auto", height: "auto" }}
-          />
+          <Image src="/payments/bkash.png" alt="bKash" width={40} height={25} />
           <Image src="/payments/visa.png" alt="Visa" width={40} height={25} />
           <Image
             src="/payments/mastercard.png"
             alt="Mastercard"
             width={40}
             height={25}
-            // style={{ objectFit: "contain" }}
-            style={{ width: "auto", height: "auto" }}
           />
           <Image
             src="/payments/cod.png"
             alt="Cash On Delivery"
             width={40}
             height={25}
-            // style={{ objectFit: "contain" }}
-            style={{ width: "auto", height: "auto" }}
           />
         </Box>
       </div>

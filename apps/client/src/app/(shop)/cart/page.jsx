@@ -23,6 +23,7 @@ import Button from "@/components/ui/Button";
 
 export default function CartPage() {
   const {
+    loading,
     items,
     updateQuantity,
     removeFromCart,
