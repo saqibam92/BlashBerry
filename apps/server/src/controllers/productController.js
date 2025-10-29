@@ -189,6 +189,39 @@ const getFeaturedProducts = async (req, res) => {
   }
 };
 
+const getTrendingProducts = async (req, res) => {
+  try {
+    const products = await Product.find({ isTrending: true, isActive: true })
+      .limit(10)
+      .sort({ createdAt: -1 });
+    res.json({ success: true, data: products });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+const getBestSellerProducts = async (req, res) => {
+  try {
+    const products = await Product.find({ isBestSeller: true, isActive: true })
+      .limit(10)
+      .sort({ createdAt: -1 });
+    res.json({ success: true, data: products });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+const getNewArrivalProducts = async (req, res) => {
+  try {
+    const products = await Product.find({ isNewArrival: true, isActive: true })
+      .limit(10)
+      .sort({ createdAt: -1 });
+    res.json({ success: true, data: products });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 const getSimilarProducts = async (req, res) => {
   try {
     const product = await Product.findOne({ slug: req.params.slug });
@@ -550,6 +583,9 @@ module.exports = {
   searchProducts,
   getProduct,
   getFeaturedProducts,
+  getTrendingProducts,
+  getBestSellerProducts,
+  getNewArrivalProducts,
   getSimilarProducts,
   createProduct,
   updateProduct,

@@ -71,6 +71,9 @@ const productSchema = new mongoose.Schema(
     reviews: [reviewSchema],
     isFeatured: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
+    isTrending: { type: Boolean, default: false },
+    isBestSeller: { type: Boolean, default: false },
+    isNewArrival: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

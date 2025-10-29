@@ -2,10 +2,12 @@
 "use client";
 import Link from "next/link";
 import { useState } from "react";
-import { ShoppingCart, User, Menu, X, Search } from "lucide-react";
+import { ShoppingCart, User, Menu, X, Package, Search } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { useRouter } from "next/navigation";
 import { SearchBar } from "./SearchBar";
+import { LocalShipping } from "@mui/icons-material";
+import { Tooltip, IconButton } from "@mui/material";
 
 const Header = () => {
   const { getCartItemCount, loading: isCartLoading } = useCart();
@@ -90,8 +92,10 @@ const Header = () => {
             onClick={handleUserClick}
             className="cursor-pointer focus:outline-none"
             aria-label="Check Orders"
+            alt="check-tracker"
           >
-            <User className="h-6 w-6 text-gray-600 hover:text-primary-600" />
+            <LocalShipping className="h-6 w-6 text-gray-600 hover:text-primary-600" />
+            {/* <User className="h-6 w-6 text-gray-600 hover:text-primary-600" /> */}
           </button>
         </div>
       </nav>

@@ -12,6 +12,7 @@ import {
   TextField,
   Divider,
   Container,
+  Skeleton,
 } from "@mui/material";
 import { Delete } from "@mui/icons-material";
 import Link from "next/link";
@@ -34,6 +35,60 @@ export default function CartPage() {
   const handleCheckout = () => {
     router.push("/checkout");
   };
+  // 🌀 Loading skeleton
+  if (loading) {
+    return (
+      <Container sx={{ py: 6 }}>
+        <Typography variant="h4" gutterBottom>
+          Loading your cart...
+        </Typography>
+        <Grid container spacing={4}>
+          <Grid item xs={12} md={8}>
+            {[1, 2, 3].map((i) => (
+              <Paper
+                key={i}
+                sx={{ display: "flex", alignItems: "center", mb: 2, p: 2 }}
+              >
+                <Skeleton
+                  variant="rectangular"
+                  width={100}
+                  height={100}
+                  sx={{ borderRadius: 1 }}
+                />
+                <Box sx={{ flexGrow: 1, ml: 2 }}>
+                  <Skeleton width="60%" height={24} />
+                  <Skeleton width="40%" height={20} />
+                  <Skeleton width="30%" height={20} />
+                </Box>
+                <Skeleton
+                  variant="rectangular"
+                  width={70}
+                  height={40}
+                  sx={{ borderRadius: 1 }}
+                />
+              </Paper>
+            ))}
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <Paper sx={{ p: 3 }}>
+              <Skeleton width="50%" height={30} />
+              <Divider sx={{ my: 2 }} />
+              <Skeleton width="80%" height={24} />
+              <Skeleton width="70%" height={24} />
+              <Divider sx={{ my: 2 }} />
+              <Skeleton width="60%" height={30} />
+              <Skeleton
+                variant="rectangular"
+                width="100%"
+                height={45}
+                sx={{ mt: 3, borderRadius: 2 }}
+              />
+            </Paper>
+          </Grid>
+        </Grid>
+      </Container>
+    );
+  }
 
   if (getCartItemCount() === 0) {
     return (

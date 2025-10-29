@@ -1,5 +1,4 @@
 // File: apps/client/src/spp/(admin)/admin/page.jsx
-
 "use client";
 import { useState, useEffect } from "react";
 import {
@@ -8,13 +7,12 @@ import {
   CardContent,
   Typography,
   Box,
-  Avatar, // <-- Import Avatar
+  Avatar,
+  CircularProgress,
 } from "@mui/material";
 import { AttachMoney, ShoppingCart, Group } from "@mui/icons-material";
-// You will create this API service in the next steps
-// import { getDashboardStats } from '@/lib/adminApi';
+import { getDashboardStats } from "@/lib/adminApi";
 
-// It's good practice to define reusable components outside the main component
 const StatCard = ({ title, value, icon, color }) => (
   <Card elevation={3} sx={{ height: "100%" }}>
     <CardContent>
@@ -39,24 +37,24 @@ export default function DashboardPage() {
   const [stats, setStats] = useState(null);
 
   useEffect(() => {
-    // const fetchStats = async () => {
-    //   const data = await getDashboardStats();
-    //   setStats(data);
-    // };
-    // fetchStats();
-
-    // Using mock data for now until the admin API is fully connected
-    setStats({
-      totalSales: 560500,
-      totalOrders: 152,
-      totalProducts: 78,
-      totalUsers: 45,
-    });
+    const fetchStats = async () => {
+      const data = await getDashboardStats();
+      setStats(data);
+    };
+    fetchStats();
   }, []);
 
   if (!stats) {
-    // You can add a loading spinner here
-    return <p>Loading dashboard...</p>;
+    return (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        height="50vh"
+      >
+        <CircularProgress />
+      </Box>
+    );
   }
 
   return (
@@ -97,7 +95,6 @@ export default function DashboardPage() {
             color="error.main"
           />
         </Grid>
-        {/* You can add Chart components here in the future */}
       </Grid>
     </Box>
   );

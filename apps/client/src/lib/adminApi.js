@@ -2,6 +2,17 @@
 
 import api from "./api";
 
+// Dashboard Stats
+export const getDashboardStats = async () => {
+  try {
+    const res = await api.get("/api/admin/stats");
+    return res.data.data;
+  } catch (error) {
+    console.error("Failed to fetch dashboard stats:", error);
+    return null;
+  }
+};
+
 // --- CATEGORY APIS ---
 export const getAdminCategories = () => api.get("/api/admin/categories");
 export const createAdminCategory = (data) =>

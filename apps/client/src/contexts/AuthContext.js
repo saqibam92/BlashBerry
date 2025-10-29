@@ -59,23 +59,44 @@ export const AuthProvider = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
   const cartContext = useCart();
 
+  // useEffect(() => {
+  //   const loadUser = async () => {
+  //     dispatch({ type: "LOGIN_START" });
+  //     const token = Cookies.get("token");
+  //     if (token) {
+  //       try {
+  //         const res = await api.get("/api/auth/me");
+  //         dispatch({ type: "AUTH_SUCCESS", payload: { user: res.data.user } });
+  //       } catch (err) {
+  //         console.error("Load user error:", err);
+  //         Cookies.remove("token");
+  //         dispatch({ type: "AUTH_ERROR", payload: "Session expired." });
+  //       }
+  //     } else {
+  //       dispatch({ type: "LOGOUT" });
+  //     }
+  //   };
+  //   loadUser();
+  // }, []);
+
   useEffect(() => {
+    const token = Cookies.get("token");
+    if (!token) {
+      dispatch({ type: "LOGOUT" });
+      return;
+    }
+
     const loadUser = async () => {
-      dispatch({ type: "LOGIN_START" });
-      const token = Cookies.get("token");
-      if (token) {
-        try {
-          const res = await api.get("/api/auth/me");
-          dispatch({ type: "AUTH_SUCCESS", payload: { user: res.data.user } });
-        } catch (err) {
-          console.error("Load user error:", err);
-          Cookies.remove("token");
-          dispatch({ type: "AUTH_ERROR", payload: "Session expired." });
-        }
-      } else {
-        dispatch({ type: "LOGOUT" });
+      try {
+        const res = await api.get("/api/auth/me");
+        dispatch({ type: "AUTH_SUCCESS", payload: { user: res.data.user } });
+      } catch (err) {
+        console.error("Load user error:", err);
+        Cookies.remove("token");
+        dispatch({ type: "AUTH_ERROR", payload: "Session expired." });
       }
     };
+
     loadUser();
   }, []);
 

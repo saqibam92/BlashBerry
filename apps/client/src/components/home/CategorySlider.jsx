@@ -22,7 +22,7 @@ export default function CategorySlider({ children }) {
 
   return (
     <div className="relative py-8 sm:py-12">
-      <div className="pointer-events-none absolute inset-y-0 left-0 right-0 flex items-center justify-between px-4 z-10">
+      {/* <div className="pointer-events-none absolute inset-y-0 left-0 right-0 flex items-center justify-between px-4 z-10">
         <div className="flex justify-between items-center">
           <button
             onClick={scrollPrev}
@@ -39,7 +39,7 @@ export default function CategorySlider({ children }) {
             <ArrowRight className="w-5 h-5" />
           </button>
         </div>
-      </div>
+      </div> */}
 
       {/* Embla Carousel Viewport */}
       <div className="overflow-hidden" ref={emblaRef}>

@@ -99,15 +99,9 @@ export default function VideoSection({ video }) {
 
   return (
     <Box sx={{ my: 8 }} ref={videoRef}>
-      <Typography
-        variant="h2"
-        className="text-2xl font-bold tracking-tight text-gray-900 mb-6"
-      >
-        Featured Video
-      </Typography>
       {video && embedData ? (
         <Box>
-          <Typography variant="h6" sx={{ mb: 2 }}>
+          <Typography variant="h4" sx={{ mb: 2 }}>
             {video.title}
           </Typography>
           <Box

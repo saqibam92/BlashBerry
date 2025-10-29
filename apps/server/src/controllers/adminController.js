@@ -8,30 +8,37 @@ const slugify = require("slugify");
 const Banner = require("../models/Banner");
 
 // --- Dashboard Analytics ---
+
 exports.getDashboardStats = async (req, res) => {
   try {
-    const totalProducts = await Product.countDocuments({ isActive: true });
-    const totalUsers = await User.countDocuments({ role: "user" });
-    const totalOrders = await Order.countDocuments();
-    const totalSalesData = await Order.aggregate([
-      { $match: { status: "Delivered" } },
-      { $group: { _id: null, amount: { $sum: "$totalAmount" } } },
+    // Total sales (sum of all orders totalPrice)
+    const totalSalesAgg = await Order.aggregate([
+      { $group: { _id: null, total: { $sum: "$totalPrice" } } },
     ]);
+    const totalSales = totalSalesAgg[0]?.total || 0;
 
-    res.json({
+    // Count totals
+    const totalOrders = await Order.countDocuments();
+    const totalProducts = await Product.countDocuments();
+    const totalUsers = await User.countDocuments({ role: "user" }); // only normal users
+
+    res.status(200).json({
       success: true,
       data: {
+        totalSales,
+        totalOrders,
         totalProducts,
         totalUsers,
-        totalOrders,
-        totalSales: totalSalesData.length > 0 ? totalSalesData[0].amount : 0,
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    console.error("Dashboard stats error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch dashboard stats",
+    });
   }
 };
-
 // --- Category Management ---
 exports.getCategories = async (req, res) => {
   try {

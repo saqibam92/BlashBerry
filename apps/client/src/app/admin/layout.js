@@ -1,7 +1,8 @@
 //File: apps/client/src/app/admin/layout.jsx;
 "use client";
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
+import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   Box,
@@ -16,6 +17,10 @@ import {
   AppBar,
   Typography,
   CircularProgress,
+  IconButton,
+  Menu,
+  MenuItem,
+  Avatar,
 } from "@mui/material";
 import {
   Dashboard,
@@ -23,11 +28,13 @@ import {
   Category,
   Group,
   Settings,
+  ExitToApp,
+  ExpandMore,
 } from "@mui/icons-material";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useState } from "react";
 
 const drawerWidth = 240;
+
 const navItems = [
   { text: "Dashboard", icon: <Dashboard />, href: "/admin" },
   { text: "Products", icon: <ShoppingCart />, href: "/admin/products" },
@@ -39,7 +46,7 @@ const navItems = [
   { text: "Settings", icon: <Settings />, href: "/admin/settings" },
 ];
 
-// A simple component to show while verifying authentication
+// Simple loading screen
 const LoadingScreen = () => (
   <Box
     sx={{
@@ -54,48 +61,107 @@ const LoadingScreen = () => (
 );
 
 export default function AdminLayout({ children }) {
-  const { isAuthenticated, user, loading } = useAuth();
+  const { isAuthenticated, user, loading, logout } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const [anchorEl, setAnchorEl] = useState(null);
 
+  // Handle auth-based redirects
   useEffect(() => {
-    // Don't do anything while the auth state is loading
-    if (loading) {
-      return;
-    }
-
-    // If not authenticated, redirect to the admin login page
+    if (loading) return;
     if (!isAuthenticated) {
       router.push("/admin-login");
       return;
     }
-
-    // If authenticated but the user is not an admin, redirect to the home page
     if (isAuthenticated && user?.role !== "admin") {
       router.push("/");
     }
   }, [isAuthenticated, user, loading, router]);
 
-  // While loading, or if the user is not a logged-in admin, show the loading screen.
-  // This prevents the admin content from flashing on the screen before a redirect.
+  // Show loader while verifying
   if (loading || !isAuthenticated || user?.role !== "admin") {
     return <LoadingScreen />;
   }
 
-  // If everything is fine, render the full admin layout with the page content
+  // Menu handling for profile/logout
+  const handleMenuOpen = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+  const handleLogout = () => {
+    logout();
+    handleMenuClose();
+    router.push("/admin-login");
+  };
+
   return (
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
+
+      {/* === TOP APP BAR === */}
       <AppBar
         position="fixed"
-        sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        sx={{
+          zIndex: (theme) => theme.zIndex.drawer + 1,
+          backgroundColor: "#111827",
+        }}
       >
-        <Toolbar>
+        <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
           <Typography variant="h6" noWrap component="div">
             BlashBerry Admin
           </Typography>
+
+          {/* Admin Info & Logout */}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Avatar
+              sx={{
+                bgcolor: "#ec4899",
+                width: 32,
+                height: 32,
+                fontSize: 14,
+              }}
+            >
+              {user?.name?.[0]?.toUpperCase() || "A"}
+            </Avatar>
+            <Typography variant="subtitle1">{user?.name || "Admin"}</Typography>
+            <Typography
+              variant="caption"
+              sx={{
+                color: "gray",
+                ml: 0.5,
+                fontSize: "0.75rem",
+                textTransform: "capitalize",
+              }}
+            >
+              ({user?.role})
+            </Typography>
+
+            <IconButton color="inherit" onClick={handleMenuOpen}>
+              <ExpandMore />
+            </IconButton>
+
+            <Menu
+              anchorEl={anchorEl}
+              open={Boolean(anchorEl)}
+              onClose={handleMenuClose}
+              anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+              transformOrigin={{ vertical: "top", horizontal: "right" }}
+            >
+              <MenuItem disabled>
+                <Typography variant="body2">{user?.email}</Typography>
+              </MenuItem>
+              <MenuItem onClick={handleLogout}>
+                <ExitToApp fontSize="small" sx={{ mr: 1 }} />
+                Logout
+              </MenuItem>
+            </Menu>
+          </Box>
         </Toolbar>
       </AppBar>
+
+      {/* === SIDE DRAWER === */}
       <Drawer
         variant="permanent"
         sx={{
@@ -125,6 +191,8 @@ export default function AdminLayout({ children }) {
           </List>
         </Box>
       </Drawer>
+
+      {/* === MAIN CONTENT === */}
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <Toolbar />
         {children}

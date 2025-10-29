@@ -18,6 +18,9 @@ const {
   previewCSVImport,
   confirmCSVImport,
   uploadImage,
+  getTrendingProducts,
+  getBestSellerProducts,
+  getNewArrivalProducts,
 } = require("../controllers/productController");
 const { protect, admin } = require("../middleware/auth");
 const Banner = require("../models/Banner");
@@ -56,6 +59,9 @@ const productValidation = [
 router.get("/", getProducts);
 router.get("/search", searchProducts);
 router.get("/featured", getFeaturedProducts);
+router.get("/trending", getTrendingProducts);
+router.get("/bestsellers", getBestSellerProducts);
+router.get("/newarrivals", getNewArrivalProducts);
 router.get("/:slug", getProduct);
 router.get("/:slug/similar", getSimilarProducts);
 router.get("/category/:categoryId", getCategoryProducts);

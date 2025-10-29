@@ -34,8 +34,6 @@ export const getFeaturedProducts = async () => {
 export const getAllProducts = async (params = {}) => {
   try {
     const response = await api.get("/api/products", { params });
-    console.log("res 1: ", response.data);
-    console.log("res 2: ", response.data.data);
     return response.data;
   } catch (error) {
     console.error("Failed to fetch products:", error);
@@ -154,5 +152,35 @@ export const getSelectedVideo = async () => {
   } catch (error) {
     console.error("Failed to fetch selected video:", error);
     return { success: false, data: null };
+  }
+};
+
+export const getTrendingProducts = async () => {
+  try {
+    const response = await api.get("/api/products/trending");
+    return response.data.data;
+  } catch (error) {
+    console.error("Failed to fetch trending products:", error);
+    return [];
+  }
+};
+
+export const getBestSellerProducts = async () => {
+  try {
+    const response = await api.get("/api/products/bestsellers");
+    return response.data.data;
+  } catch (error) {
+    console.error("Failed to fetch best sellers:", error);
+    return [];
+  }
+};
+
+export const getNewArrivalProducts = async () => {
+  try {
+    const response = await api.get("/api/products/newarrivals");
+    return response.data.data;
+  } catch (error) {
+    console.error("Failed to fetch new arrivals:", error);
+    return [];
   }
 };

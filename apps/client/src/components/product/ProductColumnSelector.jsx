@@ -4,7 +4,7 @@
 import { useState, useEffect } from "react";
 import { Box, Select, MenuItem, FormControl, InputLabel } from "@mui/material";
 
-const ProductColumnSelector = ({ onColumnChange, initialColumns = 3 }) => {
+const ProductColumnSelector = ({ onColumnChange, initialColumns = 4 }) => {
   const [columns, setColumns] = useState(initialColumns);
 
   useEffect(() => {
@@ -18,7 +18,7 @@ const ProductColumnSelector = ({ onColumnChange, initialColumns = 3 }) => {
       <FormControl fullWidth>
         <InputLabel>Columns</InputLabel>
         <Select value={columns} onChange={handleColumnChange} label="Columns">
-          {[2, 3, 4].map((col) => (
+          {[3, 4, 5].map((col) => (
             <MenuItem key={col} value={col}>
               {col} Columns
             </MenuItem>
