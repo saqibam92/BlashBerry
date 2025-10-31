@@ -143,15 +143,20 @@ const ProductCard = ({ product, onQuickViewOpen }) => {
           >
             {product.name}
           </Typography>
-          <Typography variant="h6" color="text.primary" sx={{ mt: "auto" }}>
+          <Typography
+            variant="body1"
+            color="text.primary"
+            // sx={{ mt: "auto" }}
+            fontWeight="light"
+          >
             {formatPrice(product.price)}
           </Typography>
         </CardContent>
       </Link>
 
       {/* "Select Options" Button and Size Selector */}
-      <Box sx={{ p: 2, pt: 0, mt: "auto" }}>
-        <Collapse in={!isSizeSelectorOpen} timeout="auto">
+      <Box sx={{ p: 2, pt: 0 }}>
+        <Collapse in={!isSizeSelectorOpen && isHovered} timeout="auto">
           <Button
             variant="outlined"
             fullWidth
