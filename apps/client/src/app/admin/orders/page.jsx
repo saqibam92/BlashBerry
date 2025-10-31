@@ -18,6 +18,7 @@ import {
 import { getAdminOrders, updateAdminOrderStatus } from "@/lib/adminApi";
 import { formatDate, formatPrice } from "@/lib/utils";
 import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
 const statusOptions = [
   "Pending",
@@ -29,6 +30,7 @@ const statusOptions = [
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState([]);
+  const router = useRouter();
 
   const fetchOrders = () => {
     getAdminOrders().then((res) => setOrders(res.data.data));
@@ -43,6 +45,10 @@ export default function AdminOrdersPage() {
       error: "Failed to update status.",
     });
     fetchOrders();
+  };
+
+  const handleOrderIdClick = (id) => {
+    router.push(`/admin/orders/${id}`);
   };
 
   return (
@@ -64,7 +70,15 @@ export default function AdminOrdersPage() {
           <TableBody>
             {orders.map((order) => (
               <TableRow key={order._id}>
-                <TableCell>...{order.orderNumber.slice(-12)}</TableCell>
+                <TableCell
+                  onClick={() => handleOrderIdClick(order._id)}
+                  sx={{
+                    cursor: "pointer",
+                    "&:hover": { textDecoration: "underline" },
+                  }}
+                >
+                  ...{order.orderNumber.slice(-12)}
+                </TableCell>
                 <TableCell>
                   {order.user?.name || order.shippingAddress?.fullName}
                 </TableCell>

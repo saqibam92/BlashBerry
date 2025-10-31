@@ -11,8 +11,6 @@ const protect = async (req, res, next) => {
 
       token = req.headers.authorization.split(" ")[1];
 
-      console.log("Auth middleware - Token:", token);
-
       if (!token) {
         return res.status(401).json({
           success: false,
@@ -24,7 +22,6 @@ const protect = async (req, res, next) => {
       console.log("Auth middleware - Decoded:", decoded);
 
       req.user = await User.findById(decoded.id).select("-password");
-      console.log("Auth middleware - User:", req.user);
 
       if (!req.user) {
         return res.status(401).json({
@@ -41,8 +38,7 @@ const protect = async (req, res, next) => {
       });
     }
   } else {
-    console.log("Auth middleware - No token provided"); // Debug log
-    next(); // Allow unauthenticated access for guestEmail routes
+    next();
   }
 };
 
