@@ -12,8 +12,8 @@ export default function WhatsNew({ categories }) {
   return (
     <section className="py-12 bg-white">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <h2 className="text-4xl font-bold text-left text-gray-900 mb-8">
-          WHAT'S NEW
+        <h2 className="text-4xl font-bold text-left text-gray-900 mb-8 uppercase">
+          Categories
         </h2>
         <CategorySlider>
           {duplicatedCategories.map((category, index) => (
