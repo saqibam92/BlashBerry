@@ -57,6 +57,9 @@ const cartReducer = (state, action) => {
     case "CLEAR_CART":
       return { ...state, items: [] };
 
+    case "SET_BUY_NOW_ITEM":
+      return { ...state, buyNowItem: action.payload };
+
     default:
       return state;
   }
@@ -66,6 +69,7 @@ export const CartProvider = ({ children }) => {
   const [state, dispatch] = useReducer(cartReducer, {
     items: [],
     loading: true,
+    buyNowItem: null,
   });
 
   // Load cart from localStorage once on mount
@@ -118,6 +122,10 @@ export const CartProvider = ({ children }) => {
   const clearCart = () => {
     dispatch({ type: "CLEAR_CART" });
     localStorage.removeItem("cart");
+  };
+
+  const setBuyNowItem = (item) => {
+    dispatch({ type: "SET_BUY_NOW_ITEM", payload: item });
   };
 
   const getCartItemCount = () =>
@@ -183,6 +191,8 @@ export const CartProvider = ({ children }) => {
         getCartTotal,
         mergeLocalCart,
         clearCartForLogout,
+        setBuyNowItem,
+        buyNowItem: state.buyNowItem,
       }}
     >
       {children}

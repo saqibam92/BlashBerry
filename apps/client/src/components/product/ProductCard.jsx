@@ -14,9 +14,10 @@ import {
   ToggleButtonGroup,
   ToggleButton,
 } from "@mui/material";
-import { ShoppingCart, Eye, Plus } from "lucide-react";
+import { ShoppingCart, Eye, Plus, Zap } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { formatPrice } from "@/lib/utils";
+import BuyNowButton from "@/components/common/BuyNowButton";
 
 // Pass onQuickViewOpen as a prop
 const ProductCard = ({ product, onQuickViewOpen }) => {
@@ -184,6 +185,19 @@ const ProductCard = ({ product, onQuickViewOpen }) => {
             >
               Add to Cart
             </Button>
+            {/* <BuyNowButton
+              product={product}
+              size={selectedSize}
+              quantity={1}
+              variant="outlined"
+              fullWidth
+              startIcon={<Zap size={16} />}
+              disabled={!selectedSize}
+            >
+              Buy Now
+            </BuyNowButton> */}
+            {/* <div className="flex flex-row justify-between items-center">
+            </div> */}
           </Box>
         </Collapse>
       </Box>

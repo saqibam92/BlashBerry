@@ -1,3 +1,5 @@
+// apps/client/src/hooks/useQuickView.js
+
 "use client";
 
 import { useState } from "react";

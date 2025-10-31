@@ -31,9 +31,9 @@ export default function ProductList({
   const [filters, setFilters] = useState(initialFilters);
   const [loading, setLoading] = useState(!initialProducts);
   const [columns, setColumns] = useState(4);
-  const { handleOpenQuickView, QuickViewComponent } = useQuickView(); // State for mobile filter drawer
+  const { handleOpenQuickView, QuickViewComponent } = useQuickView();
 
-  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false); // Media query for responsiveness
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
   const theme = useTheme();
   const isDesktop = useMediaQuery(theme.breakpoints.up("md"));

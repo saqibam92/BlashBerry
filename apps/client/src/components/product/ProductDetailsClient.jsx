@@ -10,6 +10,7 @@ import { useCart } from "@/contexts/CartContext";
 import toast from "react-hot-toast";
 import { Breadcrumbs, Typography, Chip, Divider, Stack } from "@mui/material";
 import Link from "next/link";
+import BuyNowButton from "@/components/common/BuyNowButton";
 
 const DetailRow = ({ label, value }) => (
   <div className="flex justify-between py-1">
@@ -21,13 +22,14 @@ const DetailRow = ({ label, value }) => (
 export default function ProductDetailsClient({ product, similarProducts }) {
   const { addToCart } = useCart();
   const [selectedSize, setSelectedSize] = useState(product.sizes?.[0] || "");
+  const [quantity, setQuantity] = useState(1);
 
   const handleAddToCart = () => {
     if (!selectedSize) {
       toast.error("Please select a size.");
       return;
     }
-    addToCart(product, 1, selectedSize);
+    addToCart(product, quantity, selectedSize);
     toast.success(`${product.name} added to cart!`);
   };
 
@@ -154,13 +156,40 @@ export default function ProductDetailsClient({ product, similarProducts }) {
                 </div>
               </div>
 
-              <Button
+              {/* <Button
                 onClick={handleAddToCart}
-                className="mt-10 w-full"
+                className="mt-10 w-full bg-pink-500/90 hover:bg-pink-600 text-white"
                 size="lg"
               >
                 Add to Cart
-              </Button>
+              </Button> */}
+              <Stack direction="column" spacing={2} className="mt-10">
+                <Button
+                  onClick={handleAddToCart}
+                  className="w-full bg-pink-500/90 hover:bg-pink-600 text-white"
+                  size="lg"
+                >
+                  Add to Cart
+                </Button>
+                {/* 2. Add the BuyNowButton */}
+                <BuyNowButton
+                  product={product}
+                  size={selectedSize}
+                  quantity={quantity}
+                  variant="outlined"
+                  fullWidth
+                  sx={{
+                    borderColor: "pink.500",
+                    color: "pink.500",
+                    "&:hover": {
+                      borderColor: "pink.600",
+                      backgroundColor: "pink.50",
+                    },
+                  }}
+                >
+                  Buy Now
+                </BuyNowButton>
+              </Stack>
             </div>
           </div>
         </div>
