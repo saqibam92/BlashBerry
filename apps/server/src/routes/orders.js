@@ -20,9 +20,9 @@ const createOrderValidation = [
     /^(\+8801\d{9}|01\d{9})$/
   ),
   body("customerDetails.address", "Address is required").not().isEmpty(),
-  body("customerDetails.city", "City is required").not().isEmpty(),
-  body("customerDetails.postalCode", "Postal code is required").not().isEmpty(),
-  body("customerDetails.country", "Country is required").not().isEmpty(),
+  // body("customerDetails.city", "City is required").not().isEmpty(),
+  // body("customerDetails.postalCode", "Postal code is required").not().isEmpty(),
+  // body("customerDetails.country", "Country is required").not().isEmpty(),
   body("items", "Your cart is empty").isArray({ min: 1 }),
 ];
 

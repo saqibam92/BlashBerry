@@ -18,7 +18,7 @@ const productSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, trim: true },
     slug: { type: String, unique: true, lowercase: true },
-    model: { type: String, trim: true }, // NEW
+    model: { type: String, trim: true },
     images: {
       type: [String],
       required: true,
@@ -26,22 +26,27 @@ const productSchema = new mongoose.Schema(
     },
     description: { type: String, required: true },
 
+    // details: {
+    //   material: { type: String, trim: true },
+    //   braDesign: { type: String, trim: true },
+    //   supportType: { type: String, trim: true },
+    //   cupShape: { type: String, trim: true },
+    //   closureType: { type: String, trim: true },
+    //   strapType: { type: String, trim: true },
+    //   decoration: { type: String, trim: true },
+    //   feature: { type: String, trim: true },
+    //   pantyType: { type: String, trim: true },
+    //   riseType: { type: String, trim: true },
+    //   removablePads: { type: Boolean, default: false },
+    //   ecoFriendly: { type: Boolean, default: false },
+    //   oemOdm: { type: Boolean, default: false },
+    //   sampleLeadTime: { type: String, trim: true },
+    //   origin: { type: String, trim: true },
+    // },
+
     details: {
-      material: { type: String, trim: true },
-      braDesign: { type: String, trim: true },
-      supportType: { type: String, trim: true },
-      cupShape: { type: String, trim: true },
-      closureType: { type: String, trim: true },
-      strapType: { type: String, trim: true },
-      decoration: { type: String, trim: true },
-      feature: { type: String, trim: true },
-      pantyType: { type: String, trim: true },
-      riseType: { type: String, trim: true },
-      removablePads: { type: Boolean, default: false },
-      ecoFriendly: { type: Boolean, default: false },
-      oemOdm: { type: Boolean, default: false },
-      sampleLeadTime: { type: String, trim: true },
-      origin: { type: String, trim: true },
+      type: Map,
+      of: String,
     },
 
     price: { type: Number, required: true, min: 0 },

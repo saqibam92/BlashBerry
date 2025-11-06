@@ -1,6 +1,4 @@
 // apps/client/src/components/admin/ProductForm.jsx
-
-// apps/client/src/components/admin/ProductForm.jsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -67,6 +65,7 @@ export default function ProductForm({ productData, isEditMode = false }) {
     category: "",
     brand: "",
     sku: "",
+    model: "",
     price: "",
     stockQuantity: "",
     sizes: "",
@@ -79,7 +78,6 @@ export default function ProductForm({ productData, isEditMode = false }) {
     isActive: true,
     details: {
       material: "",
-      model: "",
       braDesign: "",
       supportType: "",
       cupShape: "",
@@ -132,12 +130,12 @@ export default function ProductForm({ productData, isEditMode = false }) {
           discountType: productData.discount?.discountType || "percentage",
           discountAmount: productData.discount?.discountAmount || 0,
         },
+        model: productData.model || "",
         images: Array.isArray(productData.images) ? productData.images : [],
         isFeatured: productData.isFeatured || false,
         isActive: productData.isActive ?? true,
         details: {
           material: productData.details?.material || "",
-          model: productData.details?.model || "",
           braDesign: productData.details?.braDesign || "",
           supportType: productData.details?.supportType || "",
           cupShape: productData.details?.cupShape || "",
@@ -289,6 +287,14 @@ export default function ProductForm({ productData, isEditMode = false }) {
               fullWidth
               sx={{ my: 2 }}
             />
+            <TextField
+              name="model"
+              label="Model"
+              value={formData.model}
+              onChange={handleChange}
+              fullWidth
+              sx={{ my: 2 }}
+            />
           </Paper>
 
           <Paper sx={{ p: 2, mb: 2 }}>
@@ -330,15 +336,11 @@ export default function ProductForm({ productData, isEditMode = false }) {
               Lingerie Details
             </Typography>
             <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  name="details.model"
-                  label="Model"
-                  value={formData.details.model}
-                  onChange={handleChange}
-                  fullWidth
+              {/* <Grid item xs={12} sm={6}>
+                <TextField name="details.model" label="Model"
+                  value={formData.details.model} onChange={handleChange} fullWidth
                 />
-              </Grid>
+              </Grid> */}
 
               {/* {Object.entries(DROPDOWNS).map(([key, options]) => {
                 const isMultiSelect = MULTI_SELECT_FIELDS.includes(key);

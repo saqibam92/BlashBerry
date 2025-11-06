@@ -156,7 +156,7 @@ const ProductCard = ({ product, onQuickViewOpen }) => {
 
       {/* "Select Options" Button and Size Selector */}
       <Box sx={{ p: 2, pt: 0 }}>
-        <Collapse in={!isSizeSelectorOpen && isHovered} timeout="auto">
+        <Collapse in={!isSizeSelectorOpen} timeout="auto">
           <Button
             variant="outlined"
             fullWidth

@@ -3,6 +3,7 @@
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import Breadcrumbs from "@/components/common/Breadcrumbs";
+import WhatsAppWidget from "@/components/common/WhatsAppWidget";
 // import { Breadcrumbs } from "@mui/material";
 
 export default function ShopLayout({ children }) {
@@ -12,6 +13,7 @@ export default function ShopLayout({ children }) {
       <Breadcrumbs />
       <main className="flex-grow">{children}</main>
       <Footer />
+      <WhatsAppWidget />
     </div>
   );
 }
