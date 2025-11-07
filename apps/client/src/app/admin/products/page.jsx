@@ -1,4 +1,3 @@
-// File: apps/client/src/app/admin/products/page.jsx
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -24,6 +23,8 @@ import {
   Card,
   CardContent,
   Grid,
+  Tooltip,
+  Chip,
 } from "@mui/material";
 import {
   Edit,
@@ -31,6 +32,7 @@ import {
   Add,
   Visibility,
   CloudUpload,
+  Warning,
 } from "@mui/icons-material";
 import {
   getAdminProducts,
@@ -69,7 +71,12 @@ export default function AdminProductsPage() {
   useEffect(() => {
     let result = products;
     if (filters.category) {
-      result = result.filter((p) => p.category?._id === filters.category);
+      // Handle "Missing" filter
+      if (filters.category === "missing") {
+        result = result.filter((p) => !p.category);
+      } else {
+        result = result.filter((p) => p.category?._id === filters.category);
+      }
     }
     if (filters.search) {
       result = result.filter((p) =>
@@ -84,12 +91,26 @@ export default function AdminProductsPage() {
   };
 
   const handleToggle = async (id, field, currentValue) => {
-    await toast.promise(updateAdminProduct(id, { [field]: !currentValue }), {
+    const payload = { [field]: !currentValue };
+
+    // If admin is activating a product, check if it has a category
+    const product = products.find((p) => p._id === id);
+    if (field === "isActive" && !currentValue && !product.category) {
+      toast.error(
+        "Cannot activate a product with no category. Please edit and add a category first."
+      );
+      return;
+    }
+
+    await toast.promise(updateAdminProduct(id, payload), {
       loading: "Updating...",
       success: "Product updated!",
       error: "Update failed.",
     });
-    fetchData(); // Refresh data after toggle
+    // Optimistic UI update
+    setProducts((prev) =>
+      prev.map((p) => (p._id === id ? { ...p, [field]: !currentValue } : p))
+    );
   };
 
   const handleDelete = async (id) => {
@@ -103,7 +124,7 @@ export default function AdminProductsPage() {
         success: "Product deleted!",
         error: "Failed to delete product.",
       });
-      fetchData();
+      fetchData(); // Full re-fetch after delete
     }
   };
 
@@ -113,24 +134,6 @@ export default function AdminProductsPage() {
 
   return (
     <Box>
-      {/* <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          mb: 4,
-        }}
-      >
-        <Typography variant="h4">Product List</Typography>
-        <Button
-          variant="contained"
-          startIcon={<Add />}
-          onClick={() => router.push("/admin/products/add")}
-        >
-          Add New Product
-        </Button>
-      </Box> */}
-
       <Box
         sx={{
           display: "flex",
@@ -181,6 +184,15 @@ export default function AdminProductsPage() {
                       {cat.name}
                     </MenuItem>
                   ))}
+                  <MenuItem value="missing">
+                    <Chip
+                      icon={<Warning />}
+                      label="Missing"
+                      size="small"
+                      variant="outlined"
+                      color="warning"
+                    />
+                  </MenuItem>
                 </Select>
               </FormControl>
             </Grid>
@@ -228,7 +240,26 @@ export default function AdminProductsPage() {
                     {product.name}
                   </Box>
                 </TableCell>
-                <TableCell>{product.category?.name}</TableCell>
+                <TableCell>
+                  {product.category ? (
+                    product.category.name
+                  ) : (
+                    <Tooltip title="Category not set. Please edit." arrow>
+                      <Chip
+                        icon={<Warning />}
+                        label="Missing"
+                        size="small"
+                        variant="outlined"
+                        color="warning"
+                        sx={{
+                          "& .MuiChip-icon": {
+                            color: "warning.main",
+                          },
+                        }}
+                      />
+                    </Tooltip>
+                  )}
+                </TableCell>
                 <TableCell>{formatPrice(product.price)}</TableCell>
                 <TableCell>
                   {product.details?.model && (

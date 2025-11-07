@@ -17,10 +17,13 @@ import {
   Switch,
   FormControlLabel,
   CircularProgress,
+  IconButton, // Added
+  Divider,
   Checkbox,
   ListItemText,
   Chip,
   OutlinedInput,
+  Stack,
 } from "@mui/material";
 import {
   createAdminProduct,
@@ -30,35 +33,38 @@ import {
 import toast from "react-hot-toast";
 import CategoryCreator from "@/components/admin/CategoryCreator";
 import ImageUploader from "./ImageUploader";
+import AddIcon from "@mui/icons-material/Add"; // Added
+import DeleteIcon from "@mui/icons-material/Delete";
 
 // === Dropdown Options ===
-const DROPDOWNS = {
-  material: ["Spandex", "Cotton", "Lace", "Silk", "Polyester"],
-  braDesign: ["Padded", "Seamless", "Push-Up", "Wireless", "Balconette"],
-  supportType: ["Underwire", "Wireless", "Light Support"],
-  cupShape: ["Full Cup", "Demi", "Plunge", "Others"],
-  closureType: [
-    "Two Hook-and-Eye",
-    "Three Hook-and-Eye",
-    "Front Closure",
-    "None",
-  ],
-  strapType: ["Non-adjustable Straps", "Adjustable Straps", "Convertible"],
-  decoration: ["Lace", "Machine Embroidery", "Bow", "None"],
-  feature: ["Eco-Friendly", "Comfortable Fit", "Sexy Style", "Breathable"],
-  pantyType: ["Thongs", "Briefs", "Boyshorts", "G-String"],
-  riseType: ["Low", "Mid", "High"],
-  sampleLeadTime: ["3 days", "5 days", "7 days", "10 days", "14 days"],
-  origin: ["Zhejiang, China", "Guangdong, China", "India", "Vietnam"],
-};
+// const DROPDOWNS = {
+//   material: ["Spandex", "Cotton", "Lace", "Silk", "Polyester"],
+//   braDesign: ["Padded", "Seamless", "Push-Up", "Wireless", "Balconette"],
+//   supportType: ["Underwire", "Wireless", "Light Support"],
+//   cupShape: ["Full Cup", "Demi", "Plunge", "Others"],
+//   closureType: [
+//     "Two Hook-and-Eye",
+//     "Three Hook-and-Eye",
+//     "Front Closure",
+//     "None",
+//   ],
+//   strapType: ["Non-adjustable Straps", "Adjustable Straps", "Convertible"],
+//   decoration: ["Lace", "Machine Embroidery", "Bow", "None"],
+//   feature: ["Eco-Friendly", "Comfortable Fit", "Sexy Style", "Breathable"],
+//   pantyType: ["Thongs", "Briefs", "Boyshorts", "G-String"],
+//   riseType: ["Low", "Mid", "High"],
+//   sampleLeadTime: ["3 days", "5 days", "7 days", "10 days", "14 days"],
+//   origin: ["Zhejiang, China", "Guangdong, China", "India", "Vietnam"],
+// };
 
-// Multi-select fields that should be stored as arrays
-const MULTI_SELECT_FIELDS = ["decoration", "feature"];
+// // Multi-select fields that should be stored as arrays
+// const MULTI_SELECT_FIELDS = ["decoration", "feature"];
 
 export default function ProductForm({ productData, isEditMode = false }) {
   const router = useRouter();
   const [categories, setCategories] = useState([]);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
+  const [dynamicDetails, setDynamicDetails] = useState([]);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -76,23 +82,26 @@ export default function ProductForm({ productData, isEditMode = false }) {
     images: [],
     isFeatured: false,
     isActive: true,
-    details: {
-      material: "",
-      braDesign: "",
-      supportType: "",
-      cupShape: "",
-      closureType: "",
-      strapType: "",
-      decoration: [],
-      feature: [],
-      pantyType: "",
-      riseType: "",
-      removablePads: false,
-      ecoFriendly: false,
-      oemOdm: false,
-      sampleLeadTime: "",
-      origin: "",
-    },
+    isNewArrival: false, // Added
+    isTrending: false, // Added
+    isBestSeller: false, // Added
+    // details: {
+    //   material: "",
+    //   braDesign: "",
+    //   supportType: "",
+    //   cupShape: "",
+    //   closureType: "",
+    //   strapType: "",
+    //   decoration: [],
+    //   feature: [],
+    //   pantyType: "",
+    //   riseType: "",
+    //   removablePads: false,
+    //   ecoFriendly: false,
+    //   oemOdm: false,
+    //   sampleLeadTime: "",
+    //   origin: "",
+    // },
   });
   const [loading, setLoading] = useState(false);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
@@ -134,24 +143,39 @@ export default function ProductForm({ productData, isEditMode = false }) {
         images: Array.isArray(productData.images) ? productData.images : [],
         isFeatured: productData.isFeatured || false,
         isActive: productData.isActive ?? true,
-        details: {
-          material: productData.details?.material || "",
-          braDesign: productData.details?.braDesign || "",
-          supportType: productData.details?.supportType || "",
-          cupShape: productData.details?.cupShape || "",
-          closureType: productData.details?.closureType || "",
-          strapType: productData.details?.strapType || "",
-          decoration: parseToArray(productData.details?.decoration),
-          feature: parseToArray(productData.details?.feature),
-          pantyType: productData.details?.pantyType || "",
-          riseType: productData.details?.riseType || "",
-          removablePads: productData.details?.removablePads ?? false,
-          ecoFriendly: productData.details?.ecoFriendly ?? false,
-          oemOdm: productData.details?.oemOdm ?? false,
-          sampleLeadTime: productData.details?.sampleLeadTime || "",
-          origin: productData.details?.origin || "",
-        },
+        isNewArrival: productData.isNewArrival || false, // Added
+        isTrending: productData.isTrending || false, // Added
+        isBestSeller: productData.isBestSeller || false, // Added
+
+        // details: {
+        //   material: productData.details?.material || "",
+        //   braDesign: productData.details?.braDesign || "",
+        //   supportType: productData.details?.supportType || "",
+        //   cupShape: productData.details?.cupShape || "",
+        //   closureType: productData.details?.closureType || "",
+        //   strapType: productData.details?.strapType || "",
+        //   decoration: parseToArray(productData.details?.decoration),
+        //   feature: parseToArray(productData.details?.feature),
+        //   pantyType: productData.details?.pantyType || "",
+        //   riseType: productData.details?.riseType || "",
+        //   removablePads: productData.details?.removablePads ?? false,
+        //   ecoFriendly: productData.details?.ecoFriendly ?? false,
+        //   oemOdm: productData.details?.oemOdm ?? false,
+        //   sampleLeadTime: productData.details?.sampleLeadTime || "",
+        //   origin: productData.details?.origin || "",
+        // },
       });
+      // --- NEW: Populate dynamic details from the Map ---
+      if (productData.details) {
+        const detailsArray = Object.entries(productData.details).map(
+          ([key, value]) => ({
+            id: Math.random().toString(36).substr(2, 9), // simple unique id
+            key,
+            value,
+          })
+        );
+        setDynamicDetails(detailsArray);
+      }
     }
     getAdminCategories()
       .then((res) => {
@@ -160,6 +184,25 @@ export default function ProductForm({ productData, isEditMode = false }) {
       })
       .catch(() => setCategoriesLoading(false));
   }, [productData, isEditMode]);
+
+  const handleDetailChange = (id, field, value) => {
+    setDynamicDetails((prevDetails) =>
+      prevDetails.map((item) =>
+        item.id === id ? { ...item, [field]: value } : item
+      )
+    );
+  };
+
+  const addDetailField = () => {
+    setDynamicDetails((prev) => [
+      ...prev,
+      { id: Math.random().toString(36).substr(2, 9), key: "", value: "" },
+    ]);
+  };
+
+  const removeDetailField = (id) => {
+    setDynamicDetails((prev) => prev.filter((item) => item.id !== id));
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -180,16 +223,21 @@ export default function ProductForm({ productData, isEditMode = false }) {
     }
   };
 
+  // const handleToggle = (path) => (e) => {
+  //   const [parent, key] = path.split(".");
+  //   if (parent === "details") {
+  //     setFormData((prev) => ({
+  //       ...prev,
+  //       details: { ...prev.details, [key]: e.target.checked },
+  //     }));
+  //   } else {
+  //     setFormData((prev) => ({ ...prev, [path]: e.target.checked }));
+  //   }
+  // };
+
   const handleToggle = (path) => (e) => {
-    const [parent, key] = path.split(".");
-    if (parent === "details") {
-      setFormData((prev) => ({
-        ...prev,
-        details: { ...prev.details, [key]: e.target.checked },
-      }));
-    } else {
-      setFormData((prev) => ({ ...prev, [path]: e.target.checked }));
-    }
+    // This logic is now simpler
+    setFormData((prev) => ({ ...prev, [path]: e.target.checked }));
   };
 
   const handleCategoryChange = (e) => {
@@ -205,12 +253,21 @@ export default function ProductForm({ productData, isEditMode = false }) {
     setLoading(true);
 
     // Convert multi-select arrays to comma-separated strings for storage
-    const processedDetails = { ...formData.details };
-    MULTI_SELECT_FIELDS.forEach((field) => {
-      if (Array.isArray(processedDetails[field])) {
-        processedDetails[field] = processedDetails[field].join(", ");
+    // const processedDetails = { ...formData.details };
+    // MULTI_SELECT_FIELDS.forEach((field) => {
+    //   if (Array.isArray(processedDetails[field])) {
+    //     processedDetails[field] = processedDetails[field].join(", ");
+    //   }
+    // });
+
+    const detailsMap = dynamicDetails.reduce((acc, detail) => {
+      const key = detail.key.trim();
+      if (key) {
+        // Only add if key is not empty
+        acc[key] = detail.value.trim();
       }
-    });
+      return acc;
+    }, {});
 
     const payload = {
       ...formData,
@@ -233,7 +290,8 @@ export default function ProductForm({ productData, isEditMode = false }) {
         .map((c) => c.trim())
         .filter(Boolean),
       images: formData.images.filter((url) => url && url.trim()),
-      details: processedDetails,
+      // details: processedDetails,
+      details: detailsMap,
     };
 
     const apiCall = isEditMode
@@ -333,16 +391,67 @@ export default function ProductForm({ productData, isEditMode = false }) {
 
           <Paper sx={{ p: 2, mb: 2 }}>
             <Typography variant="h6" gutterBottom>
+              Product Details
+            </Typography>
+            <Stack spacing={2} sx={{ mt: 2 }}>
+              {dynamicDetails.map((item, index) => (
+                <Grid container spacing={1} key={item.id} alignItems="center">
+                  <Grid item xs={5}>
+                    <TextField
+                      label="Property Name"
+                      value={item.key}
+                      onChange={(e) =>
+                        handleDetailChange(item.id, "key", e.target.value)
+                      }
+                      fullWidth
+                      size="small"
+                      placeholder="e.g., Material"
+                    />
+                  </Grid>
+                  <Grid item xs={6}>
+                    <TextField
+                      label="Value"
+                      value={item.value}
+                      onChange={(e) =>
+                        handleDetailChange(item.id, "value", e.target.value)
+                      }
+                      fullWidth
+                      size="small"
+                      placeholder="e.g., Cotton"
+                    />
+                  </Grid>
+                  <Grid item xs={1}>
+                    <IconButton
+                      onClick={() => removeDetailField(item.id)}
+                      color="error"
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </Grid>
+                </Grid>
+              ))}
+            </Stack>
+            <Button
+              startIcon={<AddIcon />}
+              onClick={addDetailField}
+              sx={{ mt: 2 }}
+            >
+              Add Detail
+            </Button>
+          </Paper>
+
+          {/* <Paper sx={{ p: 2, mb: 2 }}> */}
+          {/* <Typography variant="h6" gutterBottom>
               Lingerie Details
             </Typography>
-            <Grid container spacing={2}>
-              {/* <Grid item xs={12} sm={6}>
+            <Grid container spacing={2}> */}
+          {/* <Grid item xs={12} sm={6}>
                 <TextField name="details.model" label="Model"
                   value={formData.details.model} onChange={handleChange} fullWidth
                 />
               </Grid> */}
 
-              {/* {Object.entries(DROPDOWNS).map(([key, options]) => {
+          {/* {Object.entries(DROPDOWNS).map(([key, options]) => {
                 const isMultiSelect = MULTI_SELECT_FIELDS.includes(key);
 
                 return (
@@ -410,7 +519,7 @@ export default function ProductForm({ productData, isEditMode = false }) {
                 );
               })} */}
 
-              {Object.entries(DROPDOWNS).map(([key, options]) => {
+          {/* {Object.entries(DROPDOWNS).map(([key, options]) => {
                 const isMulti = MULTI_SELECT_FIELDS.includes(key);
                 const value = isMulti
                   ? formData.details[key] || []
@@ -485,9 +594,9 @@ export default function ProductForm({ productData, isEditMode = false }) {
                     label={field.replace(/([A-Z])/g, " $1").trim()}
                   />
                 </Grid>
-              ))}
-            </Grid>
-          </Paper>
+              ))} */}
+          {/* </Grid> */}
+          {/* </Paper> */}
 
           <Paper sx={{ p: 2, mb: 2 }}>
             <Typography variant="h6" gutterBottom>
@@ -596,7 +705,7 @@ export default function ProductForm({ productData, isEditMode = false }) {
             />
           </Paper>
 
-          <Paper sx={{ p: 2 }}>
+          {/* <Paper sx={{ p: 2 }}>
             <Typography variant="h6" gutterBottom>
               Status
             </Typography>
@@ -619,6 +728,56 @@ export default function ProductForm({ productData, isEditMode = false }) {
                 />
               }
               label="Active"
+            />
+          </Paper> */}
+          <Paper sx={{ p: 2 }}>
+            <Typography variant="h6" gutterBottom>
+              Status & Visibility
+            </Typography>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={formData.isActive}
+                  onChange={handleToggle("isActive")}
+                />
+              }
+              label="Active (Visible in store)"
+            />
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={formData.isFeatured}
+                  onChange={handleToggle("isFeatured")}
+                />
+              }
+              label="Featured (Show on homepage)"
+            />
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={formData.isNewArrival}
+                  onChange={handleToggle("isNewArrival")}
+                />
+              }
+              label="New Arrival"
+            />
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={formData.isTrending}
+                  onChange={handleToggle("isTrending")}
+                />
+              }
+              label="Trending"
+            />
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={formData.isBestSeller}
+                  onChange={handleToggle("isBestSeller")}
+                />
+              }
+              label="Best Seller"
             />
           </Paper>
         </Grid>

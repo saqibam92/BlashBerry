@@ -14,15 +14,17 @@ const {
   createProductReview,
   getCategories,
   getCategoryProducts,
-  importProductsCSV,
+  downloadSampleCSV,
+  // importProductsCSV,
   previewCSVImport,
   confirmCSVImport,
-  uploadImage,
+  // uploadImage,
   getTrendingProducts,
   getBestSellerProducts,
   getNewArrivalProducts,
 } = require("../controllers/productController");
 const { protect, admin } = require("../middleware/auth");
+const { uploadImage, uploadCsv } = require("../middleware/multerUpload");
 const Banner = require("../models/Banner");
 
 const router = express.Router();
@@ -66,9 +68,7 @@ router.get("/:slug", getProduct);
 router.get("/:slug/similar", getSimilarProducts);
 router.get("/category/:categoryId", getCategoryProducts);
 router.post("/:slug/reviews", protect, createProductReview);
-// router.get("/categories", getCategories);
-
-// --- NEW PUBLIC ROUTE ---
+router.get("/categories", getCategories);
 router.get("/banners/active", async (req, res) => {
   try {
     const banners = await Banner.find({ isActive: true }).sort({ priority: 1 });
@@ -82,9 +82,30 @@ router.get("/banners/active", async (req, res) => {
 router.post("/", protect, admin, productValidation, createProduct);
 router.put("/:id", protect, admin, updateProduct);
 router.delete("/:id", protect, admin, deleteProduct);
-router.post("/import", protect, admin, importProductsCSV);
-router.post("/import/preview", protect, admin, previewCSVImport);
+router.get("/import/sample-csv", protect, admin, downloadSampleCSV);
+router.post(
+  "/import/preview",
+  protect,
+  admin,
+  uploadCsv.single("csvFile"),
+  previewCSVImport
+);
 router.post("/import/confirm", protect, admin, confirmCSVImport);
+// router.post(
+//   "/upload-image",
+//   protect,
+//   admin,
+//   uploadImage.array("images", 6),
+//   (req, res) => {
+//     if (!req.files?.length) {
+//       return res
+//         .status(400)
+//         .json({ success: false, message: "No files uploaded" });
+//     }
+//     const urls = req.files.map((f) => `/uploads/products/${f.filename}`);
+//     res.json({ success: true, urls });
+//   }
+// );
 router.post(
   "/upload-image",
   protect,

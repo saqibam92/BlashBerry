@@ -25,7 +25,7 @@ export const deleteAdminCategory = (id) =>
 // --- PRODUCT APIS ---
 export const getAdminProducts = (filters = {}) =>
   api.get("/api/admin/products", { params: filters });
-export const getAdminBrands = () => api.get("/api/admin/brands"); // We'll need to create this simple endpoint
+export const getAdminBrands = () => api.get("/api/admin/brands");
 export const createAdminProduct = (data) =>
   api.post("/api/admin/products", data);
 export const updateAdminProduct = (id, data) =>
@@ -105,4 +105,77 @@ export const uploadProductImages = async (files) => {
     headers: { "Content-Type": "multipart/form-data" },
   });
   return res.data.urls;
+};
+
+/**
+ * Uploads a CSV file for preview.
+ * @param {File} file The CSV file.
+ * @returns {Promise<object>} A promise that resolves to the preview data.
+ */
+export const previewCsvImport = async (file) => {
+  const formData = new FormData();
+  formData.append("csvFile", file);
+
+  try {
+    const res = await api.post("/api/products/import/preview", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    console.log(res);
+    return res.data;
+  } catch (error) {
+    console.error("Failed to preview CSV:", error);
+    throw error.response?.data || new Error("Preview failed");
+  }
+};
+
+/**
+ * Confirms and imports the CSV file.
+ * @param {File} file The same CSV file.
+ * @returns {Promise<object>} A promise that resolves to the import summary.
+ */
+export const confirmCsvImport = async (productsToImport) => {
+  // const formData = new FormData();
+  // formData.append("csvFile", file);
+
+  try {
+    // const res = await api.post("/api/products/import/confirm", formData, {
+    //   headers: {
+    //     "Content-Type": "multipart/form-data",
+    //   },
+    // });
+    const res = await api.post("/api/products/import/confirm", {
+      products: productsToImport,
+    });
+    return res.data;
+  } catch (error) {
+    console.error("Failed to import CSV:", error);
+    throw error.response?.data || new Error("Import failed");
+  }
+};
+/**
+ * Downloads the CSV template file.
+ */
+export const downloadCsvTemplate = async () => {
+  try {
+    const response = await api.get("/api/products/import/sample-csv", {
+      responseType: "blob", // Important: tells axios to handle a file download
+    });
+
+    // Create a temporary link to trigger the download
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "blashberry-product-template.csv");
+    document.body.appendChild(link);
+    link.click();
+
+    // Clean up
+    link.parentNode.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error("Failed to download CSV template:", error);
+    throw new Error("Could not download file.");
+  }
 };

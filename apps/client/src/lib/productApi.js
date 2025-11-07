@@ -31,15 +31,33 @@ export const getFeaturedProducts = async () => {
  * @param {string} params.color - Filter by color.
  * @returns {Promise<object>} A promise that resolves to the API response object.
  */
-export const getAllProducts = async (params = {}) => {
+// export const getAllProducts = async (params = {}) => {
+//   try {
+//     const response = await api.get("/api/products", { params });
+//     return response.data;
+//   } catch (error) {
+//     console.error("Failed to fetch products:", error);
+//     return { data: [], pagination: {} };
+//   }
+// };
+export async function getAllProducts(params = {}) {
+  const cleanParams = {};
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== "") {
+      cleanParams[key] = value;
+    }
+  });
+
+  const query = new URLSearchParams(cleanParams).toString();
+
   try {
-    const response = await api.get("/api/products", { params });
+    const response = await api.get(`/api/products?${query}`);
     return response.data;
   } catch (error) {
     console.error("Failed to fetch products:", error);
-    return { data: [], pagination: {} };
+    throw new Error(error.response?.data?.message || "Network response error");
   }
-};
+}
 
 /**
  * Fetches a single product by its slug.

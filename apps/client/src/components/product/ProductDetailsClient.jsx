@@ -14,7 +14,7 @@ import BuyNowButton from "@/components/common/BuyNowButton";
 
 const DetailRow = ({ label, value }) => (
   <div className="flex justify-between py-1">
-    <span className="font-medium text-gray-700">{label}:</span>
+    <span className="font-medium text-gray-700 capitalize">{label}:</span>
     <span className="text-gray-900">{value || "—"}</span>
   </div>
 );
@@ -31,6 +31,12 @@ export default function ProductDetailsClient({ product, similarProducts }) {
     }
     addToCart(product, quantity, selectedSize);
     toast.success(`${product.name} added to cart!`);
+  };
+
+  const formatDetailKey = (key) => {
+    return key
+      .replace(/([A-Z])/g, " $1")
+      .replace(/^./, (str) => str.toUpperCase());
   };
 
   return (
@@ -74,7 +80,7 @@ export default function ProductDetailsClient({ product, similarProducts }) {
               </p>
 
               {/* --- NEW: Product Details Table --- */}
-              <div className="mt-10 bg-gray-50 p-6 rounded-lg">
+              {/* <div className="mt-10 bg-gray-50 p-6 rounded-lg">
                 <h3 className="text-lg font-semibold mb-4">Product Details</h3>
                 <Stack spacing={1}>
                   <DetailRow
@@ -134,6 +140,32 @@ export default function ProductDetailsClient({ product, similarProducts }) {
                     </div>
                   </>
                 )}
+              </div> */}
+              <div className="mt-10 bg-gray-50 p-6 rounded-lg">
+                <h3 className="text-lg font-semibold mb-4">Product Details</h3>
+
+                {/* Check if details object exists and has keys */}
+                {product.details && Object.keys(product.details).length > 0 ? (
+                  <Stack spacing={1}>
+                    {Object.entries(product.details)
+                      // Filter out any key/value pair where the value is empty
+                      .filter(([key, value]) => value && value.trim() !== "")
+                      .map(([key, value]) => (
+                        <DetailRow
+                          key={key}
+                          label={formatDetailKey(key)}
+                          value={value}
+                        />
+                      ))}
+                  </Stack>
+                ) : (
+                  <p className="text-gray-500">
+                    No additional details available.
+                  </p>
+                )}
+
+                {/* This separate 'feature' block is no longer needed 
+                    as it's part of the 'details' map now. */}
               </div>
 
               {/* --- Size Selector --- */}

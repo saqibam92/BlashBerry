@@ -8,123 +8,219 @@ const multer = require("multer");
 const csv = require("csv-parser");
 const fs = require("fs");
 const path = require("path");
+const { fetchPaginatedProducts } = require("../utils/pagination");
+const { uploadCsv, uploadImage } = require("../middleware/multerUpload");
 
-// Configure multer for CSV upload
-const csvStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const dir = "uploads/csv/";
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-    cb(null, dir);
-  },
-  filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname),
-});
-const upload = multer({ storage: csvStorage });
+// --- HELPER FUNCTIONS FOR CSV IMPORT ---
 
-// --- Multer for image upload ---
-const imageStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const dir = path.join(__dirname, "../../../client/public/uploads/products");
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-    cb(null, dir);
-  },
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    cb(null, Date.now() + "-" + Math.round(Math.random() * 1e9) + ext);
-  },
-});
+// Finds a category by name, case-insensitive
+const findCategoryByName = async (name) => {
+  if (!name || name.trim() === "") return null;
+  // Use a case-insensitive regex to find the category
+  const category = await Category.findOne({
+    name: { $regex: `^${name.trim()}$`, $options: "i" },
+  });
+  return category ? category._id : null;
+};
 
-const uploadImage = multer({
-  storage: imageStorage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
-  fileFilter: (req, file, cb) => {
-    const allowed = /jpeg|jpg|png|webp/;
-    const ext = path.extname(file.originalname).toLowerCase();
-    const mime = file.mimetype;
-    if (allowed.test(ext) && allowed.test(mime)) {
-      cb(null, true);
-    } else {
-      cb(new Error("Only images (jpeg, jpg, png, webp) allowed"));
+// Splits a comma-separated string from CSV into a trimmed array
+const parseCsvArray = (str) => {
+  if (!str) return [];
+  return str
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+};
+
+// Parses all dynamic 'details.' columns from a CSV row
+const parseDetails = (row) => {
+  const details = {};
+  for (const key in row) {
+    if (key.startsWith("details.")) {
+      const detailKey = key.substring(8); // Get key name after "details."
+      if (row[key] && row[key].trim() !== "") {
+        details[detailKey] = row[key].trim();
+      }
     }
-  },
-});
+  }
+  return details;
+};
 
 // Get all products with filtering and pagination
+// const getProducts = async (req, res) => {
+//   try {
+//     const {
+//       category,
+//       size,
+//       minPrice,
+//       maxPrice,
+//       rating,
+//       sort = "createdAt",
+//       page = 1,
+//       limit = 12,
+//       search,
+//       onSale,
+//       isNewArrival,
+//     } = req.query;
+
+//     let query = { isActive: true };
+
+//     if (category) {
+//       query.category = { $in: category.split(",") };
+//     }
+//     if (size) query.sizes = { $in: [size] };
+//     if (minPrice || maxPrice) {
+//       query.price = {};
+//       if (minPrice) query.price.$gte = Number(minPrice);
+//       if (maxPrice) query.price.$lte = Number(maxPrice);
+//     }
+//     if (rating) query.rating = { $gte: Number(rating) };
+//     if (search) {
+//       query.name = { $regex: search, $options: "i" };
+//     }
+//     if (onSale === "true") {
+//       query["discount.discountAmount"] = { $gt: 0 };
+//     }
+
+//     if (isNewArrival === "true") {
+//       query.isNewArrival = true;
+//     }
+
+//     let sortObj = {};
+//     switch (sort) {
+//       case "price_asc":
+//         sortObj.price = 1;
+//         break;
+//       case "price_desc":
+//         sortObj.price = -1;
+//         break;
+//       case "rating":
+//         sortObj.rating = -1;
+//         break;
+//       case "newest":
+//         sortObj.createdAt = -1;
+//         break;
+//       default:
+//         sortObj.createdAt = -1;
+//     }
+
+//     const skip = (page - 1) * limit;
+//     const products = await Product.find(query)
+//       .populate("category", "name")
+//       .sort(sortObj)
+//       .skip(skip)
+//       .limit(Number(limit));
+
+//     const total = await Product.countDocuments(query);
+
+//     res.json({
+//       success: true,
+//       data: products,
+//       pagination: {
+//         current: Number(page),
+//         pages: Math.ceil(total / limit),
+//         total,
+//         hasNext: page * limit < total,
+//         hasPrev: page > 1,
+//       },
+//     });
+//   } catch (error) {
+//     res.status(500).json({
+//       success: false,
+//       message: error.message,
+//     });
+//   }
+// };
+
+// Get products with cursor-based pagination
 const getProducts = async (req, res) => {
   try {
     const {
+      page = 1,
+      limit = 9,
+      sort = "newest",
       category,
-      size,
+      onSale,
+      isNewArrival,
       minPrice,
       maxPrice,
-      rating,
-      sort = "createdAt",
-      page = 1,
-      limit = 12,
-      search,
+      color,
     } = req.query;
 
-    let query = { isActive: true };
+    const queryLimit = parseInt(limit);
+    const skip = (parseInt(page) - 1) * queryLimit;
 
-    if (category) {
+    // Build the query object
+    const query = { isActive: true };
+    if (category && category !== "undefined") {
       query.category = { $in: category.split(",") };
     }
-    if (size) query.sizes = { $in: [size] };
+    if (onSale === "true") {
+      query["discount.discountAmount"] = { $gt: 0 };
+    }
+    if (isNewArrival === "true") {
+      query.isNewArrival = true;
+    }
     if (minPrice || maxPrice) {
       query.price = {};
       if (minPrice) query.price.$gte = Number(minPrice);
       if (maxPrice) query.price.$lte = Number(maxPrice);
     }
-    if (rating) query.rating = { $gte: Number(rating) };
-    if (search) {
-      query.name = { $regex: search, $options: "i" };
+    if (color && color !== "undefined") {
+      query.colors = { $in: color.split(",") };
     }
 
+    // Build the sort object
     let sortObj = {};
     switch (sort) {
       case "price_asc":
-        sortObj.price = 1;
+        sortObj = { price: 1 };
         break;
       case "price_desc":
-        sortObj.price = -1;
+        sortObj = { price: -1 };
         break;
       case "rating":
-        sortObj.rating = -1;
+        sortObj = { rating: -1 };
+        break;
+      case "oldest":
+        sortObj = { createdAt: 1 };
         break;
       case "newest":
-        sortObj.createdAt = -1;
-        break;
       default:
-        sortObj.createdAt = -1;
+        sortObj = { createdAt: -1 };
     }
 
-    const skip = (page - 1) * limit;
-    const products = await Product.find(query)
-      .populate("category", "name")
-      .sort(sortObj)
-      .skip(skip)
-      .limit(Number(limit));
+    // Execute queries in parallel
+    const [data, total] = await Promise.all([
+      Product.find(query)
+        .populate("category", "name")
+        .sort(sortObj)
+        .skip(skip)
+        .limit(queryLimit),
+      Product.countDocuments(query),
+    ]);
 
-    const total = await Product.countDocuments(query);
+    const pages = Math.ceil(total / queryLimit);
+    const hasNext = Number(page) < pages;
+    const hasPrev = Number(page) > 1;
 
     res.json({
       success: true,
-      data: products,
+      data,
       pagination: {
         current: Number(page),
-        pages: Math.ceil(total / limit),
+        limit: queryLimit,
         total,
-        hasNext: page * limit < total,
-        hasPrev: page > 1,
+        pages,
+        hasNext,
+        hasPrev,
       },
     });
-  } catch (error) {
+  } catch (err) {
+    console.error("getAllProducts error:", err);
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Failed to fetch products",
     });
   }
 };
@@ -304,155 +400,310 @@ const deleteProduct = async (req, res) => {
   }
 };
 
-const importProductsCSV = (req, res) => {
-  upload.single("csvFile")(req, res, async (err) => {
+// NEW API: Download Sample CSV
+// ---
+const downloadSampleCSV = (req, res) => {
+  const filePath = path.join(
+    __dirname,
+    "../../../server/public/csv-template.csv"
+  );
+  console.log("file path: ", filePath);
+
+  if (!fs.existsSync(filePath)) {
+    return res
+      .status(404)
+      .json({ success: false, message: "Sample file not found." });
+  }
+
+  res.download(filePath, "blashberry-product-template.csv", (err) => {
     if (err) {
-      return res.status(400).json({ success: false, message: "Upload failed" });
+      console.error("Error downloading CSV:", err);
+      res
+        .status(500)
+        .json({ success: false, message: "Could not download file." });
     }
-
-    if (!req.file) {
-      return res
-        .status(400)
-        .json({ success: false, message: "No CSV file uploaded" });
-    }
-
-    const results = [];
-    fs.createReadStream(req.file.path)
-      .pipe(csv())
-      .on("data", (data) => results.push(data))
-      .on("end", async () => {
-        try {
-          const products = results.map((row) => ({
-            name: row.name,
-            description: row.description,
-            price: parseFloat(row.price),
-            stockQuantity: parseInt(row.stockQuantity),
-            category: row.categoryId,
-            images: [row.imageUrl],
-            brand: row.brand,
-            sku: row.sku,
-            sizes: row.sizes ? row.sizes.split(",") : [],
-            colors: row.colors ? row.colors.split(",") : [],
-            tags: row.tags ? row.tags.split(",") : [],
-            details: {
-              material: row.material,
-              model: row.model,
-              braDesign: row.braDesign,
-              supportType: row.supportType,
-              cupShape: row.cupShape,
-              closureType: row.closureType,
-              strapType: row.strapType,
-              decoration: row.decoration,
-              feature: row.feature,
-              pantyType: row.pantyType,
-              riseType: row.riseType,
-              removablePads: row.removablePads === "true",
-              ecoFriendly: row.ecoFriendly === "true",
-              oemOdm: row.oemOdm === "true",
-              sampleLeadTime: row.sampleLeadTime,
-              origin: row.origin,
-            },
-            isActive: true,
-            isFeatured: false,
-          }));
-
-          const inserted = await Product.insertMany(products);
-          fs.unlinkSync(req.file.path);
-
-          res.json({
-            success: true,
-            message: `${inserted.length} products imported`,
-            data: inserted,
-          });
-        } catch (error) {
-          fs.unlinkSync(req.file.path);
-          res.status(500).json({ success: false, message: error.message });
-        }
-      });
   });
 };
 
+// ---
+// PREVIEW CSV
+// ---
 const previewCSVImport = (req, res) => {
-  upload.single("csvFile")(req, res, async (err) => {
-    if (err || !req.file) {
-      return res
-        .status(400)
-        .json({ success: false, message: "CSV upload failed" });
-    }
+  if (!req.file) {
+    return res
+      .status(400)
+      .json({ success: false, message: "No CSV file uploaded" });
+  }
 
-    const results = [];
-    const errors = [];
-    let rowNum = 1;
+  const results = [];
+  const errors = [];
+  let rowNum = 1;
 
-    fs.createReadStream(req.file.path)
-      .pipe(csv())
-      .on("data", (row) => {
-        rowNum++;
-        const product = {
-          name: row.name?.trim(),
+  fs.createReadStream(req.file.path)
+    .pipe(csv())
+    .on("data", (row) => {
+      rowNum++;
+      let rowError = false;
+
+      // Basic Validation
+      if (!row.name || row.name.trim() === "") {
+        errors.push(`Row ${rowNum}: 'name' is missing.`);
+        rowError = true;
+      }
+      if (isNaN(parseFloat(row.price))) {
+        errors.push(`Row ${rowNum}: 'price' is missing or invalid.`);
+        rowError = true;
+      }
+      if (isNaN(parseInt(row.stockQuantity))) {
+        errors.push(`Row ${rowNum}: 'stockQuantity' is missing or invalid.`);
+        rowError = true;
+      }
+      if (!row.categoryName || row.categoryName.trim() === "") {
+        errors.push(`Row ${rowNum}: 'categoryName' is missing.`);
+        rowError = true;
+      }
+
+      if (!rowError) {
+        // Process data for preview
+        const productPreview = {
+          name: row.name.trim(),
           description: row.description?.trim(),
           price: parseFloat(row.price),
           stockQuantity: parseInt(row.stockQuantity),
-          category: row.categoryId?.trim(),
-          images: row.imageUrl ? [row.imageUrl.trim()] : [],
-          brand: row.brand?.trim(),
+          categoryName: row.categoryName.trim(), // Keep name for confirm step
           sku: row.sku?.trim(),
-          sizes: row.sizes ? row.sizes.split(",").map((s) => s.trim()) : [],
-          colors: row.colors ? row.colors.split(",").map((c) => c.trim()) : [],
-          tags: row.tags ? row.tags.split(",").map((t) => t.trim()) : [],
-          details: {
-            material: row.material?.trim(),
-            model: row.model?.trim(),
-            braDesign: row.braDesign?.trim(),
-            supportType: row.supportType?.trim(),
-            cupShape: row.cupShape?.trim(),
-            closureType: row.closureType?.trim(),
-            strapType: row.strapType?.trim(),
-            decoration: row.decoration?.trim(),
-            feature: row.feature?.trim(),
-            pantyType: row.pantyType?.trim(),
-            riseType: row.riseType?.trim(),
-            removablePads: row.removablePads === "true",
-            ecoFriendly: row.ecoFriendly === "true",
-            oemOdm: row.oemOdm === "true",
-            sampleLeadTime: row.sampleLeadTime?.trim(),
-            origin: row.origin?.trim(),
-          },
+          model: row.model?.trim(),
+          brand: row.brand?.trim(),
+          images: parseCsvArray(row.images),
+          sizes: parseCsvArray(row.sizes),
+          colors: parseCsvArray(row.colors),
+          tags: parseCsvArray(row.tags),
+          isFeatured: row.isFeatured?.toLowerCase() === "true",
+          isNewArrival: row.isNewArrival?.toLowerCase() === "true",
+          isTrending: row.isTrending?.toLowerCase() === "true",
+          isBestSeller: row.isBestSeller?.toLowerCase() === "true",
+          details: parseDetails(row),
         };
-
-        if (!product.name) errors.push(`Row ${rowNum}: Name missing`);
-        if (isNaN(product.price)) errors.push(`Row ${rowNum}: Invalid price`);
-        if (isNaN(product.stockQuantity))
-          errors.push(`Row ${rowNum}: Invalid stock`);
-        if (!product.category)
-          errors.push(`Row ${rowNum}: Category ID missing`);
-
-        results.push(product);
-      })
-      .on("end", () => {
-        fs.unlinkSync(req.file.path);
-        res.json({
-          success: true,
-          preview: results.slice(0, 10),
-          total: results.length,
-          errors,
-        });
+        results.push(productPreview);
+      }
+    })
+    .on("end", () => {
+      fs.unlinkSync(req.file.path);
+      console.log("previewCSVImport: results : ", results);
+      res.json({
+        success: true,
+        preview: results,
+        // preview: results.slice(0, 10),
+        total: results.length,
+        errors,
       });
+    });
+};
+
+// CONFIRM & IMPORT CSV (Reads from req.body, NOT req.file)
+// ---
+const confirmCSVImport = async (req, res) => {
+  console.log("conFirmCSVImport: req.body: ", req.body);
+  const { products } = req.body;
+
+  if (!products || !Array.isArray(products) || products.length === 0) {
+    return res
+      .status(400)
+      .json({ success: false, message: "No products to import." });
+  }
+
+  let importedCount = 0;
+  let updatedCount = 0;
+  let errorCount = 0;
+  const errors = [];
+
+  for (let i = 0; i < products.length; i++) {
+    const row = products[i];
+    const rowNum = i + 1; // Use 1-based index for errors
+
+    try {
+      // --- FIX 1: Validate required fields ---
+      if (!row.name || row.name.trim() === "") {
+        throw new Error(
+          "Product 'name' is missing. This is required for the slug."
+        );
+      }
+      if (row.price === undefined || isNaN(parseFloat(row.price))) {
+        throw new Error("Invalid or missing 'price'.");
+      }
+      if (
+        row.stockQuantity === undefined ||
+        isNaN(parseInt(row.stockQuantity))
+      ) {
+        throw new Error("Invalid or missing 'stockQuantity'.");
+      }
+
+      // --- FIX 2: Find category, but don't fail ---
+      let categoryId = null;
+      let isActive = true;
+
+      if (row.categoryName && row.categoryName.trim() !== "") {
+        categoryId = await findCategoryByName(row.categoryName);
+        if (!categoryId) {
+          // Not found: Set category to null, make product inactive
+          isActive = false;
+          errors.push(
+            `Row ${rowNum} (${row.name}): Category "${row.categoryName}" not found. Product imported as INACTIVE.`
+          );
+        }
+      } else {
+        isActive = false;
+        errors.push(
+          `Row ${rowNum} (${row.name}): 'categoryName' is missing. Product imported without a category.`
+        );
+      }
+
+      // --- Build Product Object ---
+      const productData = {
+        name: row.name,
+        description: row.description,
+        price: row.price,
+        stockQuantity: row.stockQuantity,
+        category: categoryId,
+        sku: row.sku || undefined,
+        model: row.model,
+        brand: row.brand,
+        images: row.images,
+        sizes: row.sizes,
+        colors: row.colors,
+        tags: row.tags,
+        isFeatured: row.isFeatured,
+        isNewArrival: row.isNewArrival,
+        isTrending: row.isTrending,
+        isBestSeller: row.isBestSeller,
+        isActive: isActive,
+        details: row.details,
+      };
+
+      // --- 3. Upsert: Update if SKU exists, Create if not ---
+      if (productData.sku) {
+        const result = await Product.findOneAndUpdate(
+          { sku: productData.sku },
+          productData,
+          { upsert: true, new: true, runValidators: true }
+        );
+        // Check if it was an insert or an update
+        if (result.createdAt.getTime() === result.updatedAt.getTime()) {
+          importedCount++;
+        } else {
+          updatedCount++;
+        }
+      } else {
+        // No SKU, just create a new product
+        await Product.create(productData);
+        importedCount++;
+      }
+    } catch (error) {
+      errorCount++;
+      errors.push(`Row ${rowNum} (${row.name || "N/A"}): ${error.message}`);
+    }
+  }
+
+  res.status(201).json({
+    success: true,
+    message: `Import complete: ${importedCount} created, ${updatedCount} updated, ${errorCount} errors.`,
+    errors,
   });
 };
 
-const confirmCSVImport = async (req, res) => {
-  const { products } = req.body;
-  try {
-    const inserted = await Product.insertMany(products);
-    res.json({
-      success: true,
-      message: `${inserted.length} products imported`,
-    });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-};
+// ---
+// UPDATED: Confirm & Import CSV
+// ---
+// const importProductsCSV = (req, res) => {
+//   if (!req.file) {
+//     return res
+//       .status(400)
+//       .json({ success: false, message: "No CSV file uploaded" });
+//   }
+
+//   const results = [];
+//   fs.createReadStream(req.file.path)
+//     .pipe(csv())
+//     .on("data", (data) => results.push(data))
+//     .on("end", async () => {
+//       let importedCount = 0;
+//       let updatedCount = 0;
+//       let errorCount = 0;
+//       const errors = [];
+
+//       for (let i = 0; i < results.length; i++) {
+//         const row = results[i];
+//         const rowNum = i + 2; // +1 for header, +1 for 0-index
+
+//         try {
+//           const categoryId = await findCategoryByName(row.categoryName);
+//           if (!categoryId) {
+//             throw new Error(`Category "${row.categoryName}" not found.`);
+//           }
+
+//           const productData = {
+//             name: row.name.trim(),
+//             description: row.description?.trim(),
+//             price: parseFloat(row.price),
+//             stockQuantity: parseInt(row.stockQuantity),
+//             category: categoryId,
+//             sku: row.sku?.trim() || undefined, // Use undefined if blank
+//             model: row.model?.trim(),
+//             brand: row.brand?.trim(),
+//             images: parseCsvArray(row.images),
+//             sizes: parseCsvArray(row.sizes),
+//             colors: parseCsvArray(row.colors),
+//             tags: parseCsvArray(row.tags),
+//             isFeatured: row.isFeatured?.toLowerCase() === "true",
+//             isNewArrival: row.isNewArrival?.toLowerCase() === "true",
+//             isTrending: row.isTrending?.toLowerCase() === "true",
+//             isBestSeller: row.isBestSeller?.toLowerCase() === "true",
+//             isActive: true,
+//             details: parseDetails(row),
+//           };
+
+//           if (
+//             !productData.name ||
+//             !productData.price ||
+//             !productData.stockQuantity
+//           ) {
+//             throw new Error(
+//               "Missing required fields (name, price, stockQuantity)."
+//             );
+//           }
+
+//           if (productData.sku) {
+//             // Upsert: Update if SKU exists, insert if it doesn't
+//             const result = await Product.findOneAndUpdate(
+//               { sku: productData.sku },
+//               productData,
+//               { upsert: true, new: true, runValidators: true }
+//             );
+//             if (result.createdAt.getTime() === result.updatedAt.getTime()) {
+//               importedCount++; // New product was inserted
+//             } else {
+//               updatedCount++; // Existing product was updated
+//             }
+//           } else {
+//             // No SKU, just create a new product
+//             await Product.create(productData);
+//             importedCount++;
+//           }
+//         } catch (error) {
+//           errorCount++;
+//           errors.push(`Row ${rowNum}: ${error.message}`);
+//         }
+//       }
+
+//       fs.unlinkSync(req.file.path); // Delete the temp file
+
+//       res.status(201).json({
+//         success: true,
+//         message: `Import complete: ${importedCount} created, ${updatedCount} updated, ${errorCount} errors.`,
+//         errors,
+//       });
+//     });
+// };
 
 const createProductReview = async (req, res) => {
   const { rating, comment } = req.body;
@@ -505,67 +756,117 @@ const createProductReview = async (req, res) => {
   }
 };
 
+// const getCategoryProducts = async (req, res) => {
+//   try {
+//     const { page = 1, limit = 12, sort = "createdAt", search } = req.query;
+//     const { categoryId } = req.params;
+
+//     if (!mongoose.Types.ObjectId.isValid(categoryId)) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Invalid category ID",
+//       });
+//     }
+
+//     let query = { isActive: true, category: categoryId };
+
+//     if (search) {
+//       query.name = { $regex: search, $options: "i" };
+//     }
+
+//     let sortObj = {};
+//     switch (sort) {
+//       case "price_asc":
+//         sortObj.price = 1;
+//         break;
+//       case "price_desc":
+//         sortObj.price = -1;
+//         break;
+//       case "rating":
+//         sortObj.rating = -1;
+//         break;
+//       case "newest":
+//         sortObj.createdAt = -1;
+//         break;
+//       default:
+//         sortObj.createdAt = -1;
+//     }
+
+//     const skip = (page - 1) * limit;
+//     const products = await Product.find(query)
+//       .populate("category", "name")
+//       .sort(sortObj)
+//       .skip(skip)
+//       .limit(Number(limit));
+
+//     const total = await Product.countDocuments(query);
+
+//     res.json({
+//       success: true,
+//       data: products,
+//       pagination: {
+//         current: Number(page),
+//         pages: Math.ceil(total / limit),
+//         total,
+//         hasNext: page * limit < total,
+//         hasPrev: page > 1,
+//       },
+//     });
+//   } catch (error) {
+//     res.status(500).json({
+//       success: false,
+//       message: error.message,
+//     });
+//   }
+// };
+
 const getCategoryProducts = async (req, res) => {
   try {
-    const { page = 1, limit = 12, sort = "createdAt", search } = req.query;
     const { categoryId } = req.params;
+    const { cursor, sort = "createdAt", limit = 12, search } = req.query;
 
     if (!mongoose.Types.ObjectId.isValid(categoryId)) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid category ID",
-      });
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid category ID" });
     }
 
     let query = { isActive: true, category: categoryId };
-
-    if (search) {
-      query.name = { $regex: search, $options: "i" };
-    }
+    if (search) query.name = { $regex: search, $options: "i" };
 
     let sortObj = {};
     switch (sort) {
       case "price_asc":
-        sortObj.price = 1;
+        sortObj = { price: 1, _id: 1 };
         break;
       case "price_desc":
-        sortObj.price = -1;
+        sortObj = { price: -1, _id: -1 };
         break;
       case "rating":
-        sortObj.rating = -1;
-        break;
-      case "newest":
-        sortObj.createdAt = -1;
+        sortObj = { rating: -1, _id: -1 };
         break;
       default:
-        sortObj.createdAt = -1;
+        sortObj = { createdAt: -1, _id: -1 };
     }
 
-    const skip = (page - 1) * limit;
-    const products = await Product.find(query)
-      .populate("category", "name")
-      .sort(sortObj)
-      .skip(skip)
-      .limit(Number(limit));
-
-    const total = await Product.countDocuments(query);
+    const { products, nextCursor } = await fetchPaginatedProducts(
+      query,
+      sortObj,
+      limit,
+      cursor
+    );
 
     res.json({
       success: true,
       data: products,
       pagination: {
-        current: Number(page),
-        pages: Math.ceil(total / limit),
-        total,
-        hasNext: page * limit < total,
-        hasPrev: page > 1,
+        limit: Number(limit),
+        nextCursor,
+        hasMore: Boolean(nextCursor),
       },
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -593,8 +894,9 @@ module.exports = {
   createProductReview,
   getCategories,
   getCategoryProducts,
-  importProductsCSV,
-  uploadImage,
+  downloadSampleCSV,
+  // importProductsCSV,
+  // uploadImage,
   previewCSVImport,
   confirmCSVImport,
 };

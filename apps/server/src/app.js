@@ -78,6 +78,8 @@ class Server {
       })
     );
 
+    this.app.set("etag", false);
+
     // Body Parsers
     this.app.use(express.json({ limit: "10mb" }));
     this.app.use(express.urlencoded({ extended: true, limit: "10mb" }));

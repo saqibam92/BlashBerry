@@ -17,8 +17,8 @@ const Header = () => {
 
   const navLinks = [
     { href: "/products", label: "Shop" },
-    { href: "#", label: "New Arrivals" },
-    { href: "#", label: "Sales" },
+    { href: "/new-arrivals", label: "New Arrivals" },
+    { href: "/sale", label: "Sales" },
   ];
 
   // ✅ When user clicks the icon, redirect directly to /orders/search
