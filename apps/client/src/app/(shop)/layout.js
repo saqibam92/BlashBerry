@@ -14,6 +14,8 @@ export default function ShopLayout({ children }) {
       <Breadcrumbs />
       <main className="flex-grow">{children}</main>
       <Footer />
+      <WhatsAppWidget />
+
       {/* <div className="hidden md:block">
         <Footer />
       </div>
