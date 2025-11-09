@@ -56,6 +56,8 @@ export const uploadBannerImage = (formData) =>
   api.post("/api/admin/upload/banner", formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
+export const toggleBannerActiveStatus = (id) =>
+  api.put(`/admin/banners/${id}/toggle-active`);
 
 export const getAdminVideos = async () => {
   try {
@@ -136,15 +138,7 @@ export const previewCsvImport = async (file) => {
  * @returns {Promise<object>} A promise that resolves to the import summary.
  */
 export const confirmCsvImport = async (productsToImport) => {
-  // const formData = new FormData();
-  // formData.append("csvFile", file);
-
   try {
-    // const res = await api.post("/api/products/import/confirm", formData, {
-    //   headers: {
-    //     "Content-Type": "multipart/form-data",
-    //   },
-    // });
     const res = await api.post("/api/products/import/confirm", {
       products: productsToImport,
     });

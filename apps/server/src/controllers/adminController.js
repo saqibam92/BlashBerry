@@ -363,6 +363,25 @@ exports.deleteBanner = async (req, res) => {
   }
 };
 
+exports.toggleBannerActiveStatus = async (req, res) => {
+  const banner = await Banner.findById(req.params.id);
+
+  if (banner) {
+    banner.isActive = !banner.isActive;
+    const updatedBanner = await banner.save();
+    res.json({
+      success: true,
+      message: `Banner status updated to ${
+        updatedBanner.isActive ? "Active" : "Inactive"
+      }`,
+      data: updatedBanner,
+    });
+  } else {
+    res.status(404);
+    throw new Error("Banner not found");
+  }
+};
+
 // --- File Upload ---
 exports.uploadImage = (req, res) => {
   if (!req.file) {

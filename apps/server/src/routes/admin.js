@@ -26,29 +26,18 @@ const {
   createBanner,
   updateBanner,
   deleteBanner,
-  uploadImage,
+  toggleBannerActiveStatus,
+  uploadImage: handleBannerUploadController,
 } = require("../controllers/adminController");
 const { body } = require("express-validator");
-const { uploadImage, uploadCsv } = require("../middleware/multerUpload");
-
-// Configure Multer Storage
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    const uploadPath = path.join(
-      __dirname,
-      "../../../client/public/uploads/banners"
-    );
-    fs.mkdirSync(uploadPath, { recursive: true }); // Ensure directory exists
-    cb(null, uploadPath);
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + path.extname(file.originalname)); // Append extension
-  },
-});
-const upload = multer({ storage: storage });
+const {
+  uploadImage: productImageUploader,
+  uploadCsv,
+} = require("../middleware/multerUpload");
 
 const router = express.Router();
-router.use(protect, admin); // Apply middleware to all admin routes
+router.use(protect, admin);
+
 // Validation for CREATING a product (strict)
 const createProductValidation = [
   body("name").trim().notEmpty().withMessage("Product name is required."),
@@ -114,7 +103,13 @@ router.route("/banners").get(getBanners).post(createBanner);
 
 router.route("/banners/:id").put(updateBanner).delete(deleteBanner);
 
+router.route("/banners/:id/toggle-active").put(toggleBannerActiveStatus);
+
 // --- File Upload Route ---
-router.post("/upload/banner", upload.single("file"), uploadImage);
+router.post(
+  "/upload/banner",
+  productImageUploader.single("file"),
+  handleBannerUploadController
+);
 
 module.exports = router;

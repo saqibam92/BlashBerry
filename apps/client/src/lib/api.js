@@ -1,4 +1,4 @@
-// // File: apps/client/src/lib/api.js
+// File: apps/client/src/lib/api.js
 
 import axios from "axios";
 import Cookies from "js-cookie";
