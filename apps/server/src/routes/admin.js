@@ -29,6 +29,7 @@ const {
   uploadImage,
 } = require("../controllers/adminController");
 const { body } = require("express-validator");
+const { uploadImage, uploadCsv } = require("../middleware/multerUpload");
 
 // Configure Multer Storage
 const storage = multer.diskStorage({
@@ -79,7 +80,6 @@ const updateProductValidation = [
     .optional()
     .isMongoId()
     .withMessage("A valid category is required."),
-  // ... add optional validation for other fields as needed
 ];
 
 // Dashboard
