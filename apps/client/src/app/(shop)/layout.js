@@ -13,14 +13,14 @@ export default function ShopLayout({ children }) {
       <Header />
       <Breadcrumbs />
       <main className="flex-grow">{children}</main>
-      <Footer />
-      <WhatsAppWidget />
+      {/* <Footer />
+      <WhatsAppWidget /> */}
 
-      {/* <div className="hidden md:block">
+      <div className="hidden md:block">
         <Footer />
       </div>
       <WhatsAppWidget />
-      <MobileBottomNav /> */}
+      <MobileBottomNav />
     </div>
   );
 }

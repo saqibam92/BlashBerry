@@ -88,15 +88,18 @@ const Header = () => {
           </Link>
 
           {/* ✅ User Icon: redirects to /orders/search */}
-          <button
-            onClick={handleUserClick}
-            className="cursor-pointer focus:outline-none"
-            aria-label="Check Orders"
-            alt="check-tracker"
-          >
-            <LocalShipping className="h-6 w-6 text-gray-600 hover:text-primary-600" />
-            {/* <User className="h-6 w-6 text-gray-600 hover:text-primary-600" /> */}
-          </button>
+          {/* Track Orders */}
+          <div className="hidden md:block">
+            <button
+              onClick={handleUserClick}
+              className="cursor-pointer focus:outline-none"
+              aria-label="Check Orders"
+              alt="check-tracker"
+            >
+              <LocalShipping className="h-6 w-6 text-gray-600 hover:text-primary-600" />
+              {/* <User className="h-6 w-6 text-gray-600 hover:text-primary-600" /> */}
+            </button>
+          </div>
         </div>
       </nav>
 
@@ -145,6 +148,7 @@ const Header = () => {
                 ))}
 
                 {/* ✅ Mobile: Orders Search Shortcut */}
+                {/* Track Order Mobile */}
                 <button
                   onClick={() => {
                     router.push("/orders/tracking");

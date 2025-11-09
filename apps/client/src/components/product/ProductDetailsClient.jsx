@@ -53,7 +53,7 @@ export default function ProductDetailsClient({ product, similarProducts }) {
   const [selectedSize, setSelectedSize] = useState(product.sizes?.[0] || "");
   const [quantity, setQuantity] = useState(1);
   // const [tab, setTab] = useState(0);
-  const phoneOrderNumber = "01790680578";
+  const phoneOrderNumber = "01769900180";
 
   // --- 1. Price Calculation ---
   let finalPrice = product.price;
