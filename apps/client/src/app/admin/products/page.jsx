@@ -136,14 +136,18 @@ export default function AdminProductsPage() {
     <Box>
       <Box
         sx={{
-          display: "flex",
+          display: "flex", // FIX 1: Allow wrapping and space-between on mobile/flex-end on desktop
+          flexDirection: { xs: "column", sm: "row" },
           justifyContent: "space-between",
-          alignItems: "center",
+          alignItems: { xs: "flex-start", sm: "center" },
           mb: 4,
         }}
       >
-        <Typography variant="h4">Product List</Typography>
-        <Box sx={{ display: "flex", gap: 2 }}>
+        <Typography variant="h4" sx={{ mb: { xs: 2, sm: 0 } }}>
+          Product List
+        </Typography>
+
+        <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
           <Button
             variant="outlined"
             startIcon={<CloudUpload />}
@@ -151,6 +155,7 @@ export default function AdminProductsPage() {
           >
             Import CSV
           </Button>
+
           <Button
             variant="contained"
             startIcon={<Add />}
@@ -166,8 +171,10 @@ export default function AdminProductsPage() {
           <Typography variant="h6" gutterBottom>
             Filter Products
           </Typography>
+
           <Grid container spacing={2}>
             <Grid item xs={12} sm={4}>
+              {/* Inputs are full-width on xs, 4/12 on sm+ */}
               <FormControl fullWidth>
                 <InputLabel>Category</InputLabel>
                 <Select
@@ -179,11 +186,13 @@ export default function AdminProductsPage() {
                   <MenuItem value="">
                     <em>All Categories</em>
                   </MenuItem>
+
                   {categories.map((cat) => (
                     <MenuItem key={cat._id} value={cat._id}>
                       {cat.name}
                     </MenuItem>
                   ))}
+
                   <MenuItem value="missing">
                     <Chip
                       icon={<Warning />}
@@ -196,6 +205,7 @@ export default function AdminProductsPage() {
                 </Select>
               </FormControl>
             </Grid>
+
             <Grid item xs={12} sm={8}>
               <TextField
                 fullWidth
@@ -208,27 +218,33 @@ export default function AdminProductsPage() {
           </Grid>
         </CardContent>
       </Card>
-
       {/* Products Table */}
-      <TableContainer component={Paper}>
-        <Table>
+      {/* FIX 2: Enable horizontal scrolling for the table on small screens */}
+
+      <TableContainer component={Paper} sx={{ overflowX: "auto" }}>
+        <Table sx={{ minWidth: 900 }}>
+          {/* Set a minimum width to ensure scrolling */}
           <TableHead>
             <TableRow>
               <TableCell>SL</TableCell>
               <TableCell>Product Name</TableCell>
               <TableCell>Category</TableCell>
               <TableCell>Unit Price</TableCell>
-              <TableCell>Model</TableCell>
+              <TableCell sx={{ display: { xs: "none", sm: "table-cell" } }}>
+                Model
+              </TableCell>
               <TableCell>Featured</TableCell>
               <TableCell>Status</TableCell>
               <TableCell>In stock</TableCell>
               <TableCell align="right">Actions</TableCell>
             </TableRow>
           </TableHead>
+
           <TableBody>
             {filteredProducts.map((product, index) => (
               <TableRow key={product._id} hover>
                 <TableCell>{index + 1}</TableCell>
+
                 <TableCell>
                   <Box sx={{ display: "flex", alignItems: "center" }}>
                     <Avatar
@@ -240,6 +256,7 @@ export default function AdminProductsPage() {
                     {product.name}
                   </Box>
                 </TableCell>
+
                 <TableCell>
                   {product.category ? (
                     product.category.name
@@ -260,14 +277,13 @@ export default function AdminProductsPage() {
                     </Tooltip>
                   )}
                 </TableCell>
+
                 <TableCell>{formatPrice(product.price)}</TableCell>
-                <TableCell>
-                  {product.details?.model && (
-                    <Typography variant="caption" color="text.secondary">
-                      {product.details.model}
-                    </Typography>
-                  )}
+
+                <TableCell sx={{ display: { xs: "none", sm: "table-cell" } }}>
+                  {product.details?.model}
                 </TableCell>
+
                 <TableCell>
                   <Switch
                     checked={product.isFeatured}
@@ -280,6 +296,7 @@ export default function AdminProductsPage() {
                     }
                   />
                 </TableCell>
+
                 <TableCell>
                   <Switch
                     checked={product.isActive}
@@ -289,6 +306,7 @@ export default function AdminProductsPage() {
                   />
                 </TableCell>
                 <TableCell>{product.stockQuantity}</TableCell>
+
                 <TableCell align="right">
                   <IconButton
                     color="default"
@@ -296,6 +314,7 @@ export default function AdminProductsPage() {
                   >
                     <Visibility />
                   </IconButton>
+
                   <IconButton
                     color="primary"
                     onClick={() =>
@@ -304,6 +323,7 @@ export default function AdminProductsPage() {
                   >
                     <Edit />
                   </IconButton>
+
                   <IconButton
                     color="error"
                     onClick={() => handleDelete(product._id)}
@@ -317,5 +337,189 @@ export default function AdminProductsPage() {
         </Table>
       </TableContainer>
     </Box>
+    // <Box>
+    //   <Box
+    //     sx={{
+    //       display: "flex",
+    //       justifyContent: "space-between",
+    //       alignItems: "center",
+    //       mb: 4,
+    //     }}
+    //   >
+    //     <Typography variant="h4">Product List</Typography>
+    //     <Box sx={{ display: "flex", gap: 2 }}>
+    //       <Button
+    //         variant="outlined"
+    //         startIcon={<CloudUpload />}
+    //         onClick={handleImportCSV}
+    //       >
+    //         Import CSV
+    //       </Button>
+    //       <Button
+    //         variant="contained"
+    //         startIcon={<Add />}
+    //         onClick={() => router.push("/admin/products/add")}
+    //       >
+    //         Add New Product
+    //       </Button>
+    //     </Box>
+    //   </Box>
+    //   {/* Filter Section */}
+    //   <Card component={Paper} elevation={2} sx={{ mb: 4 }}>
+    //     <CardContent>
+    //       <Typography variant="h6" gutterBottom>
+    //         Filter Products
+    //       </Typography>
+    //       <Grid container spacing={2}>
+    //         <Grid item xs={12} sm={4}>
+    //           <FormControl fullWidth>
+    //             <InputLabel>Category</InputLabel>
+    //             <Select
+    //               name="category"
+    //               value={filters.category}
+    //               label="Category"
+    //               onChange={handleFilterChange}
+    //             >
+    //               <MenuItem value="">
+    //                 <em>All Categories</em>
+    //               </MenuItem>
+    //               {categories.map((cat) => (
+    //                 <MenuItem key={cat._id} value={cat._id}>
+    //                   {cat.name}
+    //                 </MenuItem>
+    //               ))}
+    //               <MenuItem value="missing">
+    //                 <Chip
+    //                   icon={<Warning />}
+    //                   label="Missing"
+    //                   size="small"
+    //                   variant="outlined"
+    //                   color="warning"
+    //                 />
+    //               </MenuItem>
+    //             </Select>
+    //           </FormControl>
+    //         </Grid>
+    //         <Grid item xs={12} sm={8}>
+    //           <TextField
+    //             fullWidth
+    //             name="search"
+    //             label="Search by Product Name"
+    //             value={filters.search}
+    //             onChange={handleFilterChange}
+    //           />
+    //         </Grid>
+    //       </Grid>
+    //     </CardContent>
+    //   </Card>
+
+    //   {/* Products Table */}
+    //   <TableContainer component={Paper}>
+    //     <Table>
+    //       <TableHead>
+    //         <TableRow>
+    //           <TableCell>SL</TableCell>
+    //           <TableCell>Product Name</TableCell>
+    //           <TableCell>Category</TableCell>
+    //           <TableCell>Unit Price</TableCell>
+    //           <TableCell>Model</TableCell>
+    //           <TableCell>Featured</TableCell>
+    //           <TableCell>Status</TableCell>
+    //           <TableCell>In stock</TableCell>
+    //           <TableCell align="right">Actions</TableCell>
+    //         </TableRow>
+    //       </TableHead>
+    //       <TableBody>
+    //         {filteredProducts.map((product, index) => (
+    //           <TableRow key={product._id} hover>
+    //             <TableCell>{index + 1}</TableCell>
+    //             <TableCell>
+    //               <Box sx={{ display: "flex", alignItems: "center" }}>
+    //                 <Avatar
+    //                   src={product.images[0]}
+    //                   alt={product.name}
+    //                   variant="rounded"
+    //                   sx={{ mr: 2 }}
+    //                 />
+    //                 {product.name}
+    //               </Box>
+    //             </TableCell>
+    //             <TableCell>
+    //               {product.category ? (
+    //                 product.category.name
+    //               ) : (
+    //                 <Tooltip title="Category not set. Please edit." arrow>
+    //                   <Chip
+    //                     icon={<Warning />}
+    //                     label="Missing"
+    //                     size="small"
+    //                     variant="outlined"
+    //                     color="warning"
+    //                     sx={{
+    //                       "& .MuiChip-icon": {
+    //                         color: "warning.main",
+    //                       },
+    //                     }}
+    //                   />
+    //                 </Tooltip>
+    //               )}
+    //             </TableCell>
+    //             <TableCell>{formatPrice(product.price)}</TableCell>
+    //             <TableCell>
+    //               {product.details?.model && (
+    //                 <Typography variant="caption" color="text.secondary">
+    //                   {product.details.model}
+    //                 </Typography>
+    //               )}
+    //             </TableCell>
+    //             <TableCell>
+    //               <Switch
+    //                 checked={product.isFeatured}
+    //                 onChange={() =>
+    //                   handleToggle(
+    //                     product._id,
+    //                     "isFeatured",
+    //                     product.isFeatured
+    //                   )
+    //                 }
+    //               />
+    //             </TableCell>
+    //             <TableCell>
+    //               <Switch
+    //                 checked={product.isActive}
+    //                 onChange={() =>
+    //                   handleToggle(product._id, "isActive", product.isActive)
+    //                 }
+    //               />
+    //             </TableCell>
+    //             <TableCell>{product.stockQuantity}</TableCell>
+    //             <TableCell align="right">
+    //               <IconButton
+    //                 color="default"
+    //                 onClick={() => router.push(`/products/${product.slug}`)}
+    //               >
+    //                 <Visibility />
+    //               </IconButton>
+    //               <IconButton
+    //                 color="primary"
+    //                 onClick={() =>
+    //                   router.push(`/admin/products/edit/${product._id}`)
+    //                 }
+    //               >
+    //                 <Edit />
+    //               </IconButton>
+    //               <IconButton
+    //                 color="error"
+    //                 onClick={() => handleDelete(product._id)}
+    //               >
+    //                 <Delete />
+    //               </IconButton>
+    //             </TableCell>
+    //           </TableRow>
+    //         ))}
+    //       </TableBody>
+    //     </Table>
+    //   </TableContainer>
+    // </Box>
   );
 }
