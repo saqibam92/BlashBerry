@@ -48,6 +48,7 @@ class Server {
   initializeMiddleware() {
     const allowedOrigins = [
       process.env.CLIENT_URL,
+      `https://www.${new URL(process.env.CLIENT_URL).hostname}`,
       "http://localhost:3000",
       "http://localhost:3001",
       "http://localhost:3005",
