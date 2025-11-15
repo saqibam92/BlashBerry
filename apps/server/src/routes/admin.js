@@ -34,6 +34,18 @@ const {
   uploadImage: productImageUploader,
   uploadCsv,
 } = require("../middleware/multerUpload");
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+const cloudinary = require("cloudinary").v2;
+
+const bannerStorage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: "blashberry/banners", // Separate folder for banners
+    allowed_formats: ["jpeg", "jpg", "png", "webp"],
+    transformation: [{ width: 1200, crop: "limit" }],
+  },
+});
+const bannerUpload = multer({ storage: bannerStorage });
 
 const router = express.Router();
 router.use(protect, admin);
@@ -106,10 +118,15 @@ router.route("/banners/:id").put(updateBanner).delete(deleteBanner);
 router.route("/banners/:id/toggle-active").put(toggleBannerActiveStatus);
 
 // --- File Upload Route ---
-router.post(
-  "/upload/banner",
-  productImageUploader.single("file"),
-  handleBannerUploadController
-);
+// router.post(
+//   "/upload/banner",
+//   productImageUploader.single("file"),
+//   handleBannerUploadController
+// );
+router.post("/upload/banner", bannerUpload.single("file"), (req, res, next) => {
+  // Cloudinary saves URL to req.file.path. The controller can use this.
+  req.file.imageUrl = req.file.path;
+  handleBannerUploadController(req, res, next);
+});
 
 module.exports = router;

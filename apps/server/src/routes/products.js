@@ -117,7 +117,7 @@ router.post(
         .status(400)
         .json({ success: false, message: "No files uploaded" });
     }
-    const urls = req.files.map((f) => `/uploads/products/${f.filename}`);
+    const urls = req.files.map((f) => f.path);
     res.json({ success: true, urls });
   }
 );

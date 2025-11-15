@@ -12,12 +12,10 @@ const theme = createTheme({
   palette: {
     mode: "light",
     primary: {
-      main: "#AB1D79", // A nice indigo color
-      // main: "#4F46E5", // A nice indigo color
+      main: "#AB1D79",
     },
     secondary: {
-      main: "#D288B8", // A vibrant orange
-      // main: "#F97316", // A vibrant orange
+      main: "#D288B8",
     },
   },
   typography: {
