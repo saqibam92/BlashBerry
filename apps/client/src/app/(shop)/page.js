@@ -13,6 +13,7 @@ import {
   getBestSellerProducts,
   getNewArrivalProducts,
 } from "@/lib/productApi";
+export const dynamic = "force-dynamic";
 
 // This function fetches data on the server.
 async function getHomePageData() {
