@@ -24,7 +24,7 @@ const INITIAL_Y_DESKTOP = 16;
 const INITIAL_Y_MOBILE = 90;
 
 export default function WhatsAppWidget({
-  phoneNumber = "+8801769900180",
+  phoneNumber = "+8801345304161",
   message = "Hello, I have a question about a product.",
 }) {
   const theme = useTheme();
@@ -242,7 +242,7 @@ export default function WhatsAppWidget({
 // const INITIAL_Y_MOBILE = 90;
 
 // export default function WhatsAppWidget({
-//   phoneNumber = "+8801769900180",
+//   phoneNumber = "+8801345304161",
 //   message = "Hello, I have a question about a product.",
 // }) {
 //   const theme = useTheme();

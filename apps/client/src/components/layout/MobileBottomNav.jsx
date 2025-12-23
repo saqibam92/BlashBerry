@@ -23,8 +23,8 @@ import { usePathname } from "next/navigation";
 import { useCart } from "@/contexts/CartContext";
 
 export default function MobileBottomNav({
-  phoneNumber = "+8801769900180",
-  chatNumber = "+8801769900180",
+  phoneNumber = "+8801345304161",
+  chatNumber = "+8801345304161",
 }) {
   const pathname = usePathname();
   const { getCartItemCount } = useCart();

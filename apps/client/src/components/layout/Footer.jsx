@@ -23,7 +23,7 @@ export default function Footer() {
             brand inspired by the future of fashion and charmed by traditional
             colors, art and textures.
           </Typography>
-          <Typography className="text-gray-600">+880 1566002434</Typography>
+          <Typography className="text-gray-600">+880 1345304161</Typography>
           <Typography className="text-gray-600">info@blashberry.com</Typography>
         </Box>
         {/* Store Locations */}
@@ -31,35 +31,13 @@ export default function Footer() {
           <Typography variant="h6" className="font-semibold mb-4">
             Our Stores
           </Typography>
-          {/* <List className="text-gray-600 space-y-1">
+          <List className="text-gray-600 space-y-1">
             <ListItem disablePadding>
-              BlashBerryli Trade Center, Plot-6
+              House no: 20 (Rooftop), Road no: 9. Sector no: 4, Uttara,
+              Dhaka-1230
             </ListItem>
-            <ListItem disablePadding>Dhanmondi Flagship</ListItem>
-            <ListItem disablePadding>
-              Gawasia Twin Peak (1st Floor), 75 Satmasjid Road, Dhanmondi, Dhaka
-            </ListItem>
-            <ListItem disablePadding>Uttara</ListItem>
-            <ListItem disablePadding>
-              House-26 (Ground Floor), Rabindra Sarani, Sector-07, Uttara
-            </ListItem>
-            <ListItem disablePadding>Wari</ListItem>
-            <ListItem disablePadding>
-              9, Gopibagh Lane, Nawab Street, Wari
-            </ListItem>
-            <ListItem disablePadding>Mohamadpur</ListItem>
-            <ListItem disablePadding>
-              45, Probal Tower, Ring Road, Mohammadpur
-            </ListItem>
-            <ListItem disablePadding>Mymensingh</ListItem>
-            <ListItem disablePadding>
-              Holding-22, Kalishankar Guha Road, Notun Bazar, Mymensingh Sadar
-            </ListItem>
-            <ListItem disablePadding>Sylet Flagship</ListItem>
-            <ListItem disablePadding>47/A, Kumarpura</ListItem>
-          </List> */}
+          </List>
         </Box>
-        {/* Customer Care */}
         <Box>
           <Typography variant="h6" className="font-semibold mb-4">
             Customer Care
