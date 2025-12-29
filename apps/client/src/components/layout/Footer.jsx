@@ -1,142 +1,128 @@
 // File: apps/client/src/components/layout/Footer.jsx
+// File: apps/client/src/components/layout/Footer.jsx
+
 "use client";
 import Link from "next/link";
-import { Box, Typography, List, ListItem, Divider } from "@mui/material";
-import Facebook from "@mui/icons-material/Facebook";
-import Instagram from "@mui/icons-material/Instagram";
-import Youtube from "@mui/icons-material/YouTube";
-import Linkedin from "@mui/icons-material/LinkedIn";
-import TikTok from "@mui/icons-material/Twitter";
-import Image from "next/image";
+import { Container, Grid, Typography, IconButton, Box } from "@mui/material";
+import {
+  Facebook,
+  Instagram,
+  Phone,
+  Email,
+  LocationOn,
+} from "@mui/icons-material";
 
-export default function Footer() {
+const Footer = () => {
   return (
-    <footer className="bg-white py-12 border-t border-gray-200">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-6 gap-8">
-        {/* Brand */}
-        <Box className="col-span-2">
-          <Typography variant="h3" className="font-bold mb-4">
-            BlashBerry
+    <footer className="bg-[#820449] text-white py-12">
+      {/* Updated to deep purple background */}
+      <Container maxWidth="lg">
+        <Box className="mb-8">
+          <img
+            className="max-w-[35%] pb-2"
+            src={"/blashberry_logo.png"}
+            alt="BlashBerry Logo"
+          />
+          <Typography className="text-gray-300 leading-relaxed max-w-4xl mx-auto">
+            At Blashberry, we redefine confidence through comfort and style. We
+            specialize in importing premium, trendy, and fashionable lingerie
+            directly from China and Thailand. Our mission is to provide every
+            woman with the perfect blend of high-quality fabrics and modern
+            designs, ensuring maximum comfort without compromising on elegance.
           </Typography>
-          <Typography className="text-gray-600 mb-4">
-            BlashBerry is not just another clothing brand, but an innovative
-            brand inspired by the future of fashion and charmed by traditional
-            colors, art and textures.
-          </Typography>
-          <Typography className="text-gray-600">+880 1345304161</Typography>
-          <Typography className="text-gray-600">info@blashberry.com</Typography>
         </Box>
-        {/* Store Locations */}
-        <Box>
-          <Typography variant="h6" className="font-semibold mb-4">
-            Our Stores
-          </Typography>
-          <List className="text-gray-600 space-y-1">
-            <ListItem disablePadding>
-              House no: 20 (Rooftop), Road no: 9. Sector no: 4, Uttara,
-              Dhaka-1230
-            </ListItem>
-          </List>
-        </Box>
-        <Box>
-          <Typography variant="h6" className="font-semibold mb-4">
-            Customer Care
-          </Typography>
-          <List className="text-gray-600 space-y-1">
-            <ListItem disablePadding>
-              <Link href="/contact-us">Contact Us</Link>
-            </ListItem>
-            <ListItem disablePadding>
-              <Link href="/faqs">FAQs</Link>
-            </ListItem>
-            <ListItem disablePadding>
-              <Link href="/store-locations">Store Locations</Link>
-            </ListItem>
-            <ListItem disablePadding>
+
+        <Grid container spacing={8} justifyContent="center">
+          {/* Column 1: CONTACT */}
+          <Grid item xs={12} md={4}>
+            <Typography
+              variant="h6"
+              className="font-bold mb-6 text-center md:text-left"
+            >
+              CONTACT
+            </Typography>
+            <Box className="space-y-4">
+              <Box className="flex items-start justify-center md:justify-start space-x-3">
+                <LocationOn className="text-white mt-1 shrink-0" />
+                <Typography className="text-gray-300 text-center md:text-left">
+                  Rooftop, House no: 20, Road no: 09,
+                  <br />
+                  Sector no: 04, Uttara, Dhaka-1230.
+                </Typography>
+              </Box>
+              <Box className="flex items-center justify-center md:justify-start space-x-3">
+                <Phone className="text-white shrink-0" />
+                <Typography className="text-gray-300">
+                  +8801345304161
+                </Typography>
+              </Box>
+            </Box>
+          </Grid>
+
+          {/* Column 2: SHOPPING INFO */}
+          <Grid item xs={12} md={4}>
+            <Typography variant="h6" className="font-bold mb-6 text-center">
+              SHOPPING INFO
+            </Typography>
+            <Box className="space-y-4 text-center">
               <Link href="/exchange-return-policy">
-                Exchange & Return Policy
+                <Typography className="text-gray-300 hover:underline">
+                  Our Delivery & Return Policy
+                </Typography>
               </Link>
-            </ListItem>
-          </List>
-        </Box>
-        {/* Information */}
-        <Box>
-          <Typography variant="h6" className="font-semibold mb-4">
-            Information
+              {/* <Link href="/my-account">
+                <Typography className="text-gray-300 hover:underline">
+                  My Account
+                </Typography>
+              </Link> */}
+              <Link href="/orders/tracking">
+                <Typography className="text-gray-300 hover:underline">
+                  My Orders
+                </Typography>
+              </Link>
+            </Box>
+          </Grid>
+
+          {/* Column 3: FOLLOW US */}
+          <Grid item xs={12} md={4}>
+            <Typography
+              variant="h6"
+              className="font-bold mb-6 text-center md:text-right"
+            >
+              FOLLOW US
+            </Typography>
+            <Box className="flex space-x-4 justify-center md:justify-end">
+              <IconButton
+                component="a"
+                href="https://www.facebook.com/share/1C2qvvtAvJ/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-white/10 hover:bg-white/20 text-white"
+              >
+                <Facebook fontSize="large" />
+              </IconButton>
+              <IconButton
+                component="a"
+                href="https://www.instagram.com/blash.berry?igsh=bWpzNm42cWJxcm05"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-white/10 hover:bg-white/20 text-white"
+              >
+                <Instagram fontSize="large" />
+              </IconButton>
+            </Box>
+          </Grid>
+        </Grid>
+
+        {/* Copyright Section */}
+        <Box className="border-t border-white/30 mt-12 pt-8 text-center">
+          <Typography className="text-gray-400 text-sm">
+            © BLASHBERRY. All rights Reserved.
           </Typography>
-          <List className="text-gray-600 space-y-1">
-            <ListItem disablePadding>
-              <Link href="/about-us">About Us</Link>
-            </ListItem>
-            <ListItem disablePadding>
-              <Link href="/delivery-partner">Delivery Partner</Link>
-            </ListItem>
-            <ListItem disablePadding>
-              <Link href="/privacy-policy">Privacy Policy</Link>
-            </ListItem>
-            <ListItem disablePadding>
-              <Link href="/terms-conditions">Terms & Conditions</Link>
-            </ListItem>
-          </List>
         </Box>
-        {/* Account & Follow Us */}
-        <Box>
-          <Typography variant="h6" className="font-semibold mb-4">
-            Account
-          </Typography>
-          <List className="text-gray-600 space-y-1 mb-6">
-            <ListItem disablePadding>
-              <Link href="/my-account">My Account</Link>
-            </ListItem>
-            <ListItem disablePadding>
-              <Link href="/my-orders">My Orders</Link>
-            </ListItem>
-            <ListItem disablePadding>
-              <Link href="/wishlist">Wishlist</Link>
-            </ListItem>
-          </List>
-          <Typography variant="h6" className="font-semibold mb-4">
-            Follow Us
-          </Typography>
-          <Box className="flex space-x-4">
-            <Link href="#">
-              <Facebook />
-            </Link>
-            <Link href="#">
-              <Instagram />
-            </Link>
-            <Link href="#">
-              <Youtube />
-            </Link>
-            <Link href="#">
-              <Linkedin />
-            </Link>
-            <Link href="#">
-              <TikTok />
-            </Link>
-          </Box>
-        </Box>
-      </div>
-      <Divider className="my-8" />
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center text-gray-600">
-        <Typography>&copy; BlashBerry. All Rights Reserved.</Typography>
-        <Box className="flex space-x-4 mt-4 md:mt-0">
-          <Image src="/payments/bkash.png" alt="bKash" width={40} height={25} />
-          <Image src="/payments/visa.png" alt="Visa" width={40} height={25} />
-          <Image
-            src="/payments/mastercard.png"
-            alt="Mastercard"
-            width={40}
-            height={25}
-          />
-          <Image
-            src="/payments/cod.png"
-            alt="Cash On Delivery"
-            width={40}
-            height={25}
-          />
-        </Box>
-      </div>
+      </Container>
     </footer>
   );
-}
+};
+
+export default Footer;
