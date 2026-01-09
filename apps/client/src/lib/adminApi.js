@@ -61,7 +61,7 @@ export const toggleBannerActiveStatus = (id) =>
 
 export const getAdminVideos = async () => {
   try {
-    const response = await api.get("/api/video/admin");
+    const response = await api.get("/api/videos/admin");
     return response.data;
   } catch (error) {
     console.error("Failed to fetch videos:", error);

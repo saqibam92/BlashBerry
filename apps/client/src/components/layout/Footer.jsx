@@ -19,8 +19,8 @@ const Footer = () => {
       <Container maxWidth="lg">
         <Box className="mb-8">
           <img
-            className="max-w-[35%] pb-2"
-            src={"/blashberry_logo.png"}
+            className="max-w-[25%] pb-2 cover"
+            src={"/blashberry_logo_transperant.png"}
             alt="BlashBerry Logo"
           />
           <Typography className="text-gray-300 leading-relaxed max-w-4xl mx-auto">
@@ -61,10 +61,10 @@ const Footer = () => {
 
           {/* Column 2: SHOPPING INFO */}
           <Grid item xs={12} md={4}>
-            <Typography variant="h6" className="font-bold mb-6 text-center">
+            <Typography variant="h6" className="font-bold mb-6">
               SHOPPING INFO
             </Typography>
-            <Box className="space-y-4 text-center">
+            <Box className="space-y-4">
               <Link href="/exchange-return-policy">
                 <Typography className="text-gray-300 hover:underline">
                   Our Delivery & Return Policy

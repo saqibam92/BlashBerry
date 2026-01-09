@@ -22,7 +22,7 @@ const loadRoutes = (app) => {
   app.use("/api/products", productRoutes);
   app.use("/api/orders", orderRoutes);
   app.use("/api/category", categoryRoutes);
-  app.use("/api/video", videoRoutes);
+  app.use("/api/videos", videoRoutes);
 };
 
 module.exports = { loadRoutes };

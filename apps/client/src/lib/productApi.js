@@ -165,7 +165,7 @@ export const getActiveBanners = () => api.get("/api/products/banners/active");
  */
 export const getSelectedVideo = async () => {
   try {
-    const response = await api.get("/api/video");
+    const response = await api.get("/api/videos");
     return response.data;
   } catch (error) {
     console.error("Failed to fetch selected video:", error);
